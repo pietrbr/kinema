@@ -1,0 +1,30 @@
+# Plans and local notes
+plans/
+
+# LaTeX build files
+*.aux
+*.log
+*.nav
+*.out
+*.snm
+*.toc
+*.vrb
+*.dvi
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# zlides build output
+*.zlides/
+
+# Browser test screenshots
+shots/
+
+# Editor and OS files
+.DS_Store
+
+# Test fixtures build output
+tests/fixtures/*.html
+
+# Python
+__pycache__/

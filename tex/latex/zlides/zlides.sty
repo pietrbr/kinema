@@ -1,0 +1,27 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{zlides}[2026/10/09 v0.1 Browser animations between Beamer overlays]
+\RequirePackage{tikz}
+\makeatletter
+% Each key marks a TikZ scope; zlides-viewer.js animates scopes that share a name on
+% consecutive pages. The keys emit SVG only under the dvisvgm driver, which the
+% zlides build selects; every other driver ignores them.
+\def\zl@driver{pgfsys-dvisvgm.def}
+\def\zl@keys#1{%
+  \tikzset{#1/.style={
+    execute at begin scope={\pgfsysprotocol@literal{<g data-zl-#1="##1">}},
+    execute at end scope={\pgfsysprotocol@literal{</g>}}}}}
+\gdef\zl@transition{}
+\newcount\zl@frame
+\newcommand{\zltransition}[1]{\gdef\zl@transition{#1}}
+\ifx\pgfsysdriver\zl@driver
+  \zl@keys{morph}\zl@keys{move}\zl@keys{zoom}\zl@keys{fade}\zl@keys{drawon}
+  \tikzset{every picture/.append style={
+    execute at begin picture={\pgfsysprotocol@literal{<g data-zl-picture="">}},
+    execute at end picture={\pgfsysprotocol@literal{</g>}}}}
+  \AtBeginEnvironment{frame}{\gdef\zl@transition{}\global\advance\zl@frame by 1 }
+  \AddToHook{shipout/foreground}{\put(0,0){\special{dvisvgm:raw
+    <g data-zl-frame='\the\zl@frame' data-zl-transition='\zl@transition'/>}}}
+\else
+  \tikzset{morph/.style={}, move/.style={}, zoom/.style={}, fade/.style={}, drawon/.style={}}
+\fi
+\makeatother

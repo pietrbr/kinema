@@ -1,0 +1,39 @@
+% One page pair per morph case that tests/check_morph.py inspects mid-morph.
+\documentclass{beamer}
+\usepackage{zlides}
+\setbeamertemplate{navigation symbols}{}
+
+\begin{document}
+
+\begin{frame}{Ring}
+  \begin{tikzpicture}
+    \useasboundingbox (-2,-2) rectangle (6,2);
+    \begin{scope}[morph=ring]
+      \only<1>{\fill[blue, even odd rule] (0,0) circle (1) (0,0) circle (0.5);}
+      \only<2>{\fill[blue, even odd rule] (3,0) circle (1.5) (3,0) circle (0.7);}
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Open curve}
+  \begin{tikzpicture}
+    \useasboundingbox (-2,-2) rectangle (6,2);
+    \begin{scope}[morph=curve]
+      \only<1>{\draw[line width=2pt] (0,0) .. controls (1,1.5) and (2,-1.5) .. (3,0);}
+      \only<2>{\draw[line width=2pt] (0,1) .. controls (1,-1.5) and (2,1.5) .. (3,1);}
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Label}
+  \begin{tikzpicture}
+    \useasboundingbox (-2,-2) rectangle (6,2);
+    \begin{scope}[morph=box]
+      \only<1>{\draw (0,-0.5) rectangle (2,0.5);}
+      \only<2>{\draw (0,-0.5) rectangle (4,0.5);}
+      \node at (1,0) {label};
+    \end{scope}
+  \end{tikzpicture}
+\end{frame}
+
+\end{document}

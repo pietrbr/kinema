@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>zlides</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
+  #deck { position: relative; width: 100vw; height: 100vh; }
+  .page { position: absolute; inset: 0; display: none; background: #000; }
+  .page.current { display: block; }
+  .page > svg, #overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #overlay { pointer-events: none; z-index: 10; }
+  #help { position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.6); font: 16px/1.6 sans-serif; color: #fff; }
+  #help.open { display: flex; }
+  #help table { background: rgba(20,20,20,0.92); border-radius: 8px; padding: 16px 24px; border-spacing: 16px 4px; }
+  #help kbd { font: 14px monospace; padding: 1px 6px; border: 1px solid #fff8; border-radius: 4px; }
+</style>
+</head>
+<body>
+<div id="deck">
+<!--PAGES-->
+<svg id="overlay"></svg>
+</div>
+<div id="help"><table>
+  <tr><td><kbd>&rarr;</kbd> <kbd>Space</kbd> <kbd>Page Down</kbd> click</td><td>next page</td></tr>
+  <tr><td><kbd>&larr;</kbd> <kbd>Page Up</kbd></td><td>previous page</td></tr>
+  <tr><td><kbd>f</kbd></td><td>full screen on and off</td></tr>
+  <tr><td><kbd>?</kbd></td><td>this help on and off</td></tr>
+  <tr><td><kbd>Esc</kbd></td><td>close this help</td></tr>
+</table></div>
+<script>window.ZL_IMAGES = /*IMAGES*/;</script>
+<script>
+/*VIEWER*/
+</script>
+</body>
+</html>
