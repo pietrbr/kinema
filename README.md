@@ -36,7 +36,7 @@ You build the PDF as usual, for example with `latexmk`. On Overleaf, upload `zli
 
 ## Requirements
 
-zlides needs only a TeX installation, TeX Live or MacTeX, which include `latex`, `dvisvgm`, and `texlua`. PDF figures do not appear in the HTML deck yet. zlides was tested on macOS, in Brave, Chrome, Firefox, and WebKit.
+zlides needs only a TeX installation, TeX Live or MacTeX, which include `latex`, `dvisvgm`, and `texlua`. For PDF figures, the HTML build also needs `pdftocairo` (from Poppler) or `pdf2svg`. zlides was tested on macOS, in Brave, Chrome, Firefox, and WebKit.
 
 ## Documentation
 

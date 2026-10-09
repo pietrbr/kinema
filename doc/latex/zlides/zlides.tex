@@ -22,7 +22,7 @@
 \newcommand{\cmd}[1]{\texttt{#1}}
 
 \title{The \pkg{} package\\[0.3em]\large Browser animations between Beamer overlays}
-\date{Version 0.1, 2026/10/09}
+\date{Version 0.2, 2026/10/09}
 
 \begin{document}
 \maketitle
@@ -48,14 +48,14 @@ Open the HTML file to see each feature in this manual.
 
 The HTML build has three steps:
 \begin{enumerate}
-  \item \cmd{latex} compiles the deck to DVI, the TeX output format before PDF.
-    The build selects the \cmd{dvisvgm} driver of PGF. With this driver, each
-    named scope becomes an SVG group with a \cmd{data-zl-*} attribute.
-  \item \cmd{dvisvgm} converts each DVI page into one SVG file. It draws the text
-    as shapes, so the text looks identical to the PDF.
-  \item The \cmd{zlides} script puts all SVG pages, all images, and the viewer
-    into one HTML file. In the browser, the viewer finds groups with the same name
-    on two consecutive pages and animates between them.
+	\item \cmd{latex} compiles the deck to DVI, the TeX output format before PDF.
+	      The build selects the \cmd{dvisvgm} driver of PGF. With this driver, each
+	      named scope becomes an SVG group with a \cmd{data-zl-*} attribute.
+	\item \cmd{dvisvgm} converts each DVI page into one SVG file. It draws the text
+	      as shapes, so the text looks identical to the PDF.
+	\item The \cmd{zlides} script puts all SVG pages, all images, and the viewer
+	      into one HTML file. In the browser, the viewer finds groups with the same name
+	      on two consecutive pages and animates between them.
 \end{enumerate}
 
 \section{Requirements and installation}
@@ -64,13 +64,15 @@ The HTML build has three steps:
 
 You need these programs:
 \begin{itemize}
-  \item TeX Live or MacTeX. \pkg{} uses \cmd{latex}, \cmd{dvisvgm}, and
-    \cmd{texlua}, which both distributions include.
-  \item A current browser. \pkg{} was tested in Brave, Chrome, Firefox, and
-    WebKit, the engine of Safari.
+	\item TeX Live or MacTeX. \pkg{} uses \cmd{latex}, \cmd{dvisvgm}, and
+	      \cmd{texlua}, which both distributions include.
+	\item For PDF figures only: \cmd{pdftocairo} from Poppler, or \cmd{pdf2svg}.
+	      Neither is part of a TeX distribution.
+	\item A current browser. \pkg{} was tested in Brave, Chrome, Firefox, and
+	      WebKit, the engine of Safari.
 \end{itemize}
 
-\pkg{} needs nothing outside the TeX installation. It was tested on macOS,
+Without PDF figures, \pkg{} needs nothing outside the TeX installation. It was tested on macOS,
 and it was not tested on Windows or Linux.
 
 \subsection{Installation}
@@ -81,10 +83,10 @@ Run the install script from the repository:
 \end{lstlisting}
 The script makes three symbolic links:
 \begin{itemize}
-  \item \cmd{tex/latex/zlides} into \cmd{TEXMFHOME/tex/latex}, for the package.
-  \item \cmd{scripts/zlides} into \cmd{TEXMFHOME/scripts}, for the build script.
-  \item \cmd{scripts/zlides/zlides.lua} as \cmd{\textasciitilde/.local/bin/zlides},
-    for the command.
+	\item \cmd{tex/latex/zlides} into \cmd{TEXMFHOME/tex/latex}, for the package.
+	\item \cmd{scripts/zlides} into \cmd{TEXMFHOME/scripts}, for the build script.
+	\item \cmd{scripts/zlides/zlides.lua} as \cmd{\textasciitilde/.local/bin/zlides},
+	      for the command.
 \end{itemize}
 To put the command in a different directory, set \cmd{ZLIDES\_BINDIR} before you
 run the script. If that directory is not on your \cmd{PATH}, the script tells you.
@@ -117,17 +119,17 @@ The package defines five TikZ keys. Each key takes a name and goes on a
 \cmd{scope} environment:
 
 \begin{description}
-  \item[\cmd{morph=<name>}] marks the paths of a shape. On the next page, the
-    paths change into the paths of the scope with the same name.
-  \item[\cmd{move=<name>}] marks a group, for example a text node. On the next
-    page, the group moves and scales to the bounding box of the group with the
-    same name.
-  \item[\cmd{zoom=<name>}] marks a block for a camera zoom. The block on one
-    page is small, and the block on the next page is large.
-  \item[\cmd{fade=<name>}] marks a group that fades in on the first page that has
-    its name.
-  \item[\cmd{drawon=<name>}] marks a group whose lines are drawn on, on the first
-    page that has its name.
+	\item[\cmd{morph=<name>}] marks the paths of a shape. On the next page, the
+	      paths change into the paths of the scope with the same name.
+	\item[\cmd{move=<name>}] marks a group, for example a text node. On the next
+	      page, the group moves and scales to the bounding box of the group with the
+	      same name.
+	\item[\cmd{zoom=<name>}] marks a block for a camera zoom. The block on one
+	      page is small, and the block on the next page is large.
+	\item[\cmd{fade=<name>}] marks a group that fades in on the first page that has
+	      its name.
+	\item[\cmd{drawon=<name>}] marks a group whose lines are drawn on, on the first
+	      page that has its name.
 \end{description}
 
 In the PDF, all five keys do nothing.
@@ -136,17 +138,17 @@ In the PDF, all five keys do nothing.
 
 These rules apply to the names:
 \begin{enumerate}
-  \item Use each name only once on a page.
-  \item Give the two shapes the same name on two consecutive pages. The two pages
-    can be two overlays of one frame. They can also be the last overlay of a frame
-    and the first overlay of the next frame.
-  \item For a morph, put the same number of paths in both scopes. \pkg{} pairs the
-    paths in their order and ignores extra paths.
-  \item For a camera zoom, put \cmd{zoom=<name>} on the small block in the
-    overview and on the large block on the next page. \pkg{} zooms the whole
-    picture that contains the small block.
-  \item For fade and draw-on, the animation runs on the first page that has the
-    name. If the previous page has the same name, nothing happens.
+	\item Use each name only once on a page.
+	\item Give the two shapes the same name on two consecutive pages. The two pages
+	      can be two overlays of one frame. They can also be the last overlay of a frame
+	      and the first overlay of the next frame.
+	\item For a morph, put the same number of paths in both scopes. \pkg{} pairs the
+	      paths in their order and ignores extra paths.
+	\item For a camera zoom, put \cmd{zoom=<name>} on the small block in the
+	      overview and on the large block on the next page. \pkg{} zooms the whole
+	      picture that contains the small block.
+	\item For fade and draw-on, the animation runs on the first page that has the
+	      name. If the previous page has the same name, nothing happens.
 \end{enumerate}
 
 Keep the same picture size and position on the pages that animate. A
@@ -174,19 +176,19 @@ two states. Between them, the circle moves to the right, changes into the
 rectangle, and changes color from blue to red.
 
 \begin{figure}[ht]
-  \centering
-  \begin{tikzpicture}[scale=0.6]
-    \draw[black!30] (-1.2,-1.2) rectangle (5.2,2.2);
-    \begin{scope}[morph=box]\fill[blue] (0,0) circle (1);\end{scope}
-    \node[below] at (2,-1.2) {page 1};
-  \end{tikzpicture}\hspace{2em}%
-  \begin{tikzpicture}[scale=0.6]
-    \draw[black!30] (-1.2,-1.2) rectangle (5.2,2.2);
-    \begin{scope}[morph=box]\fill[red] (2,0) rectangle (5,2);\end{scope}
-    \node[below] at (2,-1.2) {page 2};
-  \end{tikzpicture}
-  \caption{The two PDF pages of the example frame.}
-  \label{fig:pdf}
+	\centering
+	\begin{tikzpicture}[scale=0.6]
+		\draw[black!30] (-1.2,-1.2) rectangle (5.2,2.2);
+		\begin{scope}[morph=box]\fill[blue] (0,0) circle (1);\end{scope}
+		\node[below] at (2,-1.2) {page 1};
+	\end{tikzpicture}\hspace{2em}%
+	\begin{tikzpicture}[scale=0.6]
+		\draw[black!30] (-1.2,-1.2) rectangle (5.2,2.2);
+		\begin{scope}[morph=box]\fill[red] (2,0) rectangle (5,2);\end{scope}
+		\node[below] at (2,-1.2) {page 2};
+	\end{tikzpicture}
+	\caption{The two PDF pages of the example frame.}
+	\label{fig:pdf}
 \end{figure}
 
 \subsection{Frame transitions}
@@ -208,12 +210,12 @@ runs.
 On each page change, the viewer runs one main animation. It tries these in order
 and uses the first one that applies:
 \begin{enumerate}
-  \item A camera zoom, if both pages have a \cmd{zoom} name with blocks of
-    different sizes.
-  \item A morph, if both pages have \cmd{morph} or \cmd{move} names whose shapes
-    differ. The viewer skips a pair whose shapes and colors are identical.
-  \item A frame transition, if the new page starts a frame with
-    \cmd{\textbackslash zltransition}.
+	\item A camera zoom, if both pages have a \cmd{zoom} name with blocks of
+	      different sizes.
+	\item A morph, if both pages have \cmd{morph} or \cmd{move} names whose shapes
+	      differ. The viewer skips a pair whose shapes and colors are identical.
+	\item A frame transition, if the new page starts a frame with
+	      \cmd{\textbackslash zltransition}.
 \end{enumerate}
 If none applies, the page changes at once. After the main animation, fade and
 draw-on groups that are new on this page run. If you press a key during an
@@ -245,10 +247,10 @@ over the old page from 35\,\% to 100\,\% of the animation.
 
 Between two frames, the morph runs in three phases:
 \begin{enumerate}
-  \item From 0\,\% to 25\,\%, the rest of the old picture fades out. The morphing
-    shapes and the moving groups stay.
-  \item From 20\,\% to 80\,\%, the shapes morph and the groups move.
-  \item From 75\,\% to 100\,\%, the new page fades in around the finished shape.
+	\item From 0\,\% to 25\,\%, the rest of the old picture fades out. The morphing
+	      shapes and the moving groups stay.
+	\item From 20\,\% to 80\,\%, the shapes morph and the groups move.
+	\item From 75\,\% to 100\,\%, the new page fades in around the finished shape.
 \end{enumerate}
 Use the staged morph to zoom into one block of a diagram. Put \cmd{morph} on the
 small block and on a large block that fills the next frame. Put \cmd{move} on the
@@ -285,21 +287,21 @@ Table~\ref{tab:durations} lists the default durations. The \cmd{speed} URL
 parameter multiplies all of them.
 
 \begin{table}[ht]
-  \centering
-  \begin{tabular}{lr}
-    \toprule
-    Animation & Duration (ms) \\
-    \midrule
-    Morph inside a frame & 700 \\
-    Staged morph between frames & 1300 \\
-    Camera zoom & 1000 \\
-    Fade transition & 450 \\
-    Push transition & 550 \\
-    Fade and draw-on groups & 550 \\
-    \bottomrule
-  \end{tabular}
-  \caption{Default durations of the animations.}
-  \label{tab:durations}
+	\centering
+	\begin{tabular}{lr}
+		\toprule
+		Animation                   & Duration (ms) \\
+		\midrule
+		Morph inside a frame        & 700           \\
+		Staged morph between frames & 1300          \\
+		Camera zoom                 & 1000          \\
+		Fade transition             & 450           \\
+		Push transition             & 550           \\
+		Fade and draw-on groups     & 550           \\
+		\bottomrule
+	\end{tabular}
+	\caption{Default durations of the animations.}
+	\label{tab:durations}
 \end{table}
 
 \section{Building}
@@ -331,14 +333,39 @@ citations show in the HTML deck. Build the PDF first if the deck has citations. 
 If \cmd{latex} fails, \cmd{zlides} prints the first error from the log and stops.
 The full log is \cmd{talk.zlides/talk.log}.
 
-\subsection{Images}
+\subsection{Images and figures}
 
 The HTML deck embeds PNG, JPEG, GIF, and SVG images, for example a theme
 background. \pkg{} finds an image next to the source file or through the TeX
-search path. PDF and EPS figures do not appear in the HTML deck yet. For these
-files, \cmd{dvisvgm} needs \cmd{mutool} from MuPDF, or a Ghostscript version
-older than 10.01, and \pkg{} does not use either. If \cmd{dvisvgm} reports an
-error, \cmd{zlides} prints it.
+search path. \cmd{dvisvgm} cannot read PDF files without tools outside TeX, so
+the HTML build handles figures in these ways:
+\begin{itemize}
+	\item PDF figures included with \cmd{\textbackslash includegraphics}: the
+	      package lists each PDF and page in \cmd{talk.zlides/talk.zlpdf}.
+	      \cmd{zlides} converts each one to SVG with \cmd{pdftocairo} from Poppler,
+	      or with \cmd{pdf2svg} if \cmd{pdftocairo} fails, and runs LaTeX once more
+	      to put the SVG files in place. The name of each SVG file contains a hash of
+	      the PDF content, so a changed PDF gets a new SVG. A conversion takes about
+	      40\,ms for a typical figure. If neither tool is installed, the build stops
+	      with an error.
+	\item TikZ pictures that use the \cmd{external} library: in the HTML build,
+	      \pkg{} turns externalization off, so TikZ draws each picture inline as SVG.
+	      The PDF build still uses the cached PDFs.
+	\item Standalone TikZ figures included with \cmd{\textbackslash
+		      includestandalone} from the \textsf{standalone} package: in the HTML build,
+	      \pkg{} sets the \cmd{tex} mode, so the figure source is drawn inline as
+	      SVG. The deck must load the packages and macros that the figures need.
+	\item An SVG copy next to the PDF: if \cmd{\textbackslash includegraphics}
+	      has no file extension, the HTML build uses the SVG and the PDF build uses
+	      the PDF. This path needs no conversion tool.
+	\item EPS figures: the HTML build stops with an error. Convert them to PDF
+	      or SVG.
+\end{itemize}
+The \cmd{trim}, \cmd{viewport}, \cmd{clip}, and \cmd{pagebox} options of
+\cmd{\textbackslash includegraphics} are not supported for converted PDF figures:
+the SVG always shows the whole page. For \cmd{clip}, \pkg{} prints a warning. If
+a figure exists as PDF and as EPS, the HTML build uses the PDF. If \cmd{dvisvgm} reports an error,
+\cmd{zlides} prints it.
 
 \subsection{The PDF}
 
@@ -361,11 +388,11 @@ deck for the PDF and again for the HTML. The file
 
 Open the HTML file in a browser. The deck uses these controls:
 \begin{itemize}
-  \item Right arrow, Page Down, Space, or a click: next page.
-  \item Left arrow or Page Up: previous page.
-  \item \cmd{f}: full screen on and off.
-  \item \cmd{?}: a list of the keys on and off. \cmd{Esc} or a click also closes
-    the list.
+	\item Right arrow, Page Down, Space, or a click: next page.
+	\item Left arrow or Page Up: previous page.
+	\item \cmd{f}: full screen on and off.
+	\item \cmd{?}: a list of the keys on and off. \cmd{Esc} or a click also closes
+	      the list.
 \end{itemize}
 
 If the window has a different aspect ratio than the slides, black bars fill the
@@ -373,11 +400,11 @@ rest of the window.
 
 The URL takes these parameters:
 \begin{description}
-  \item[\cmd{page=N}] opens the deck on page $N$.
-  \item[\cmd{speed=S}] multiplies all durations by $S$. A value below 1 makes the
-    animations faster.
-  \item[\cmd{freeze=T}] stops the next main animation at progress $T$, a number
-    from 0 to 1. The browser test uses it for screenshots.
+	\item[\cmd{page=N}] opens the deck on page $N$.
+	\item[\cmd{speed=S}] multiplies all durations by $S$. A value below 1 makes the
+	      animations faster.
+	\item[\cmd{freeze=T}] stops the next main animation at progress $T$, a number
+	      from 0 to 1. The browser test uses it for screenshots.
 \end{description}
 
 To present on another computer, copy the HTML file. It needs no other files and
@@ -386,28 +413,28 @@ no network connection.
 \section{Browser support}
 
 \begin{sloppypar}
-The viewer uses only standard browser features: the SVG geometry functions
-\cmd{getTotalLength}, \cmd{getPointAtLength}, \cmd{getBBox}, and
-\cmd{getScreenCTM}, the \cmd{DOMMatrix} type, and \cmd{requestAnimationFrame}. It
-does not use SMIL animation or the CSS \cmd{d} property, which browsers support
-unevenly. The browser test passed in Chromium, Chrome, Brave, Firefox, and WebKit.
-Brave and Chrome use the same engine.
+	The viewer uses only standard browser features: the SVG geometry functions
+	\cmd{getTotalLength}, \cmd{getPointAtLength}, \cmd{getBBox}, and
+	\cmd{getScreenCTM}, the \cmd{DOMMatrix} type, and \cmd{requestAnimationFrame}. It
+	does not use SMIL animation or the CSS \cmd{d} property, which browsers support
+	unevenly. The browser test passed in Chromium, Chrome, Brave, Firefox, and WebKit.
+	Brave and Chrome use the same engine.
 \end{sloppypar}
 
 \section{Limits}
 
 \pkg{} has these known limits:
 \begin{itemize}
-  \item A morph pairs the outlines of two paths in their order. If one path has
-    more outlines, for example a ring that becomes a disk, the extra outlines do
-    not morph. They show with the new page.
-  \item A morph does not blend dash patterns, gradients, or opacity.
-  \item The HTML deck draws text as shapes, so the viewer cannot select or copy
-    text.
-  \item Text outside the picture does not take part in a staged morph or a camera
-    zoom. It cross-fades with the new page.
-  \item PDF and EPS figures do not appear in the HTML deck.
-  \item The build was not tested on Windows or with \cmd{fontspec} fonts.
+	\item A morph pairs the outlines of two paths in their order. If one path has
+	      more outlines, for example a ring that becomes a disk, the extra outlines do
+	      not morph. They show with the new page.
+	\item A morph does not blend dash patterns, gradients, or opacity.
+	\item The HTML deck draws text as shapes, so the viewer cannot select or copy
+	      text.
+	\item Text outside the picture does not take part in a staged morph or a camera
+	      zoom. It cross-fades with the new page.
+	\item PDF figures need \cmd{pdftocairo} or \cmd{pdf2svg}, or an SVG copy. EPS figures do not appear in the HTML deck.
+	\item The build was not tested on Windows or with \cmd{fontspec} fonts.
 \end{itemize}
 
 \section{Development}
@@ -416,14 +443,15 @@ Brave and Chrome use the same engine.
 
 The repository contains these files:
 \begin{description}
-  \item[\cmd{tex/latex/zlides/zlides.sty}] the LaTeX package.
-  \item[\cmd{scripts/zlides/zlides.lua}] the \cmd{zlides} command.
-  \item[\cmd{scripts/zlides/zlides-viewer.js}] the viewer that runs in the browser.
-  \item[\cmd{scripts/zlides/zlides-template.html}] the page that holds the deck.
-  \item[\cmd{doc/latex/zlides/}] this manual.
-  \item[\cmd{examples/}] the example deck, its outputs, and its \cmd{latexmkrc}.
-  \item[\cmd{tests/check\_browsers.py}] the browser test.
-  \item[\cmd{install.sh}] the install script.
+	\item[\cmd{tex/latex/zlides/zlides.sty}] the LaTeX package.
+	\item[\cmd{scripts/zlides/zlides.lua}] the \cmd{zlides} command.
+	\item[\cmd{scripts/zlides/zlides-viewer.js}] the viewer that runs in the browser.
+	\item[\cmd{scripts/zlides/zlides-template.html}] the page that holds the deck.
+	\item[\cmd{doc/latex/zlides/}] this manual.
+	\item[\cmd{examples/}] the example deck, its outputs, and its \cmd{latexmkrc}.
+	\item[\cmd{tests/check\_browsers.py}] the browser test.
+	\item[\cmd{tests/check\_morph.py}, \cmd{tests/check\_build.py}] the morph test and the build test for PDF figures.
+	\item[\cmd{install.sh}] the install script.
 \end{description}
 
 \subsection{Building from the repository}

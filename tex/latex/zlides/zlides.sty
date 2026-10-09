@@ -1,10 +1,13 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{zlides}[2026/10/09 v0.1 Browser animations between Beamer overlays]
+\ProvidesPackage{zlides}[2026/10/09 v0.2 Browser animations between Beamer overlays]
 \RequirePackage{tikz}
 \makeatletter
 % Each key marks a TikZ scope; zlides-viewer.js animates scopes that share a name on
 % consecutive pages. The keys emit SVG only under the dvisvgm driver, which the
-% zlides build selects; every other driver ignores them.
+% zlides build selects; every other driver ignores them. Under that driver, TikZ
+% externalization is off, \includestandalone reads the figure source, and each PDF
+% figure is listed in \jobname.zlpdf and replaced by the SVG that the build makes
+% from it in \zloutdir, because dvisvgm cannot read PDF files on its own.
 \def\zl@driver{pgfsys-dvisvgm.def}
 \def\zl@keys#1{%
   \tikzset{#1/.style={
@@ -18,6 +21,43 @@
   \tikzset{every picture/.append style={
     execute at begin picture={\pgfsysprotocol@literal{<g data-zl-picture="">}},
     execute at end picture={\pgfsysprotocol@literal{</g>}}}}
+  \PassOptionsToPackage{mode=tex}{standalone}
+  \RequirePackage{pdftexcmds}
+  \providecommand{\zloutdir}{}
+  \newwrite\zl@pdflist
+  \def\zl@noeps#1{\PackageError{zlides}{The HTML deck cannot show #1.
+    Convert it to PDF or SVG}{}}
+  \def\zl@pdf#1{%
+    \edef\zl@page{\ifx\Gin@page\@empty 1\else\Gin@page\fi}%
+    \edef\zl@file{#1}%
+    \ifcsname zl@key@\zl@file:\zl@page\endcsname\else
+      \expandafter\xdef\csname zl@key@\zl@file:\zl@page\endcsname{%
+        \pdf@mdfivesum{\zl@file:\zl@page:\pdf@filemdfivesum{\zl@file}}}%
+      \immediate\write\zl@pdflist{\csname zl@key@\zl@file:\zl@page\endcsname
+        \space\zl@page\space\detokenize\expandafter{\zl@file}}%
+    \fi
+    \edef\zl@svg{\zloutdir zl-\csname zl@key@\zl@file:\zl@page\endcsname.svg}%
+    \ifGin@clip\PackageWarning{zlides}{The HTML deck ignores clip for #1}\fi
+    \IfFileExists{\zl@svg}{\zl@pdfassvg}{}}
+  \def\zl@pdfassvg{%
+    \dimen@\Gin@urx pt\advance\dimen@-\Gin@llx pt%
+    \edef\Gin@svg@real@width@bp{\strip@pt\dimen@}%
+    \dimen@\Gin@ury pt\advance\dimen@-\Gin@lly pt%
+    \edef\Gin@svg@real@height@bp{\strip@pt\dimen@}%
+    \def\Gin@llx{0}\def\Gin@lly{0}%
+    \let\Gin@urx\Gin@svg@real@width@bp
+    \let\Gin@ury\Gin@svg@real@height@bp
+    \Ginclude@bitmap{\zl@svg}}
+  \def\zl@graphics{%
+    \let\Ginclude@pdf\zl@pdf
+    \let\Ginclude@eps\zl@noeps
+    \def\Gin@extensions{.svg,.pdf,.eps,.png,.jpg,.jpeg}}
+  \immediate\openout\zl@pdflist=\jobname.zlpdf
+  \ifdefined\Ginclude@pdf\zl@graphics\fi
+  \AtBeginDocument{%
+    \ifdefined\tikzexternaldisable\tikzexternaldisable\fi
+    \ifdefined\standaloneconfig\standaloneconfig{mode=tex}\fi
+    \zl@graphics}
   \AtBeginEnvironment{frame}{\gdef\zl@transition{}\global\advance\zl@frame by 1 }
   \AddToHook{shipout/foreground}{\put(0,0){\special{dvisvgm:raw
     <g data-zl-frame='\the\zl@frame' data-zl-transition='\zl@transition'/>}}}

@@ -6,7 +6,9 @@ local lfs = require("lfs")
 local mime = require("mime")
 
 local MIME = { png = "image/png", jpg = "image/jpeg", jpeg = "image/jpeg", gif = "image/gif", svg = "image/svg+xml" }
-local MAX_LATEX_RUNS = 3
+local MAX_LATEX_RUNS = 4
+local SVG_PREFIX = "zl-"
+local ERROR_LINES = 12
 local ENGINES = { latex = true, dvilualatex = true }
 local HTML_SETUP = [[\def\pgfsysdriver{pgfsys-dvisvgm.def}]]
   .. [[\PassOptionsToPackage{dvisvgm}{graphicx}\PassOptionsToPackage{dvisvgm}{xcolor}]]
@@ -106,7 +108,8 @@ end
 
 local function run_latex(engine, stem, outdir)
   local cmd = string.format("%s -interaction=nonstopmode -output-directory=%s -jobname=%s %s",
-    engine, quote(outdir), quote(stem), quote(HTML_SETUP .. "\\input{" .. stem .. ".tex}"))
+    engine, quote(outdir), quote(stem),
+    quote(HTML_SETUP .. "\\def\\zloutdir{" .. stem .. ".zlides/}\\input{" .. stem .. ".tex}"))
   local log_path = outdir .. "/" .. stem .. ".log"
   os.remove(log_path)
   local ok, output = capture(cmd)
@@ -115,10 +118,83 @@ local function run_latex(engine, stem, outdir)
   end
   local log = read(log_path)
   if not ok then
-    local first = log:find("\n!") or math.max(1, #log - 2000)
-    fail(engine .. " failed; from " .. log_path .. ":\n" .. log:sub(first, first + 1500))
+    local first = log:find("\n!")
+    if not first then
+      fail(engine .. " failed; see " .. log_path .. ":\n" .. output:sub(-1500))
+    end
+    local excerpt = {}
+    for line in log:sub(first + 1):gmatch("[^\n]*") do
+      excerpt[#excerpt + 1] = line
+      if line:match("^l%.%d+") or #excerpt >= ERROR_LINES then
+        break
+      end
+    end
+    fail(engine .. " failed; see " .. log_path .. ":\n" .. table.concat(excerpt, "\n"))
   end
   return log
+end
+
+local function pdf_to_svg(input, page, output)
+  local converters = {
+    string.format("pdftocairo -svg -f %d -l %d %s %s", page, page, quote(input), quote(output)),
+    string.format("pdf2svg %s %s %d", quote(input), quote(output), page),
+  }
+  local errors = {}
+  for _, cmd in ipairs(converters) do
+    local ok, output_text = capture(cmd)
+    if ok and exists(output) then
+      return nil
+    end
+    os.remove(output)
+    errors[#errors + 1] = cmd:match("^%S+") .. ": " .. output_text
+  end
+  return table.concat(errors, "\n")
+end
+
+-- Converts the PDF figures that the package listed; returns how many SVG files it wrote.
+local function convert_pdfs(stem, srcdir, outdir)
+  local converted = 0
+  local wanted = {}
+  for line in read_optional(outdir .. "/" .. stem .. ".zlpdf"):gmatch("[^\n]+") do
+    local key, page, file = line:match("^(%x+) (%d+) (.+)$")
+    if not key then
+      goto continue
+    end
+    local name = SVG_PREFIX .. key .. ".svg"
+    wanted[name] = true
+    if exists(outdir .. "/" .. name) then
+      goto continue
+    end
+    local errors = pdf_to_svg(find_image(file, srcdir), tonumber(page), outdir .. "/" .. name)
+    if errors then
+      fail("cannot convert " .. file .. " (page " .. page .. ") to SVG. Install Poppler (pdftocairo) "
+        .. "or pdf2svg, or put an SVG copy next to the PDF and write \\includegraphics without "
+        .. "the extension.\n" .. errors)
+    end
+    converted = converted + 1
+    ::continue::
+  end
+  for file in lfs.dir(outdir) do
+    if file:sub(1, #SVG_PREFIX) == SVG_PREFIX and file:match("^%S+%.svg$") and not wanted[file] then
+      os.remove(outdir .. "/" .. file)
+    end
+  end
+  return converted
+end
+
+local function run_latex_until_settled(engine, stem, srcdir, outdir)
+  local aux = outdir .. "/" .. stem .. ".aux"
+  local before = read_optional(aux)
+  for _ = 1, MAX_LATEX_RUNS do
+    local log = run_latex(engine, stem, outdir)
+    local converted = convert_pdfs(stem, srcdir, outdir)
+    local after = read_optional(aux)
+    if converted == 0 and after == before and not log:find("Rerun to", 1, true) then
+      return
+    end
+    before = after
+  end
+  io.stderr:write("zlides: references still changed after " .. MAX_LATEX_RUNS .. " LaTeX runs\n")
 end
 
 local function run_dvisvgm(stem, outdir)
@@ -199,21 +275,7 @@ local function main()
   if exists(bbl) then
     write(outdir .. "/" .. stem .. ".bbl", read(bbl))
   end
-  local aux = outdir .. "/" .. stem .. ".aux"
-  local before = read_optional(aux)
-  local settled = false
-  for _ = 1, MAX_LATEX_RUNS do
-    local log = run_latex(engine, stem, outdir)
-    local after = read_optional(aux)
-    settled = after == before and not log:find("Rerun to", 1, true)
-    if settled then
-      break
-    end
-    before = after
-  end
-  if not settled then
-    io.stderr:write("zlides: references still changed after " .. MAX_LATEX_RUNS .. " LaTeX runs\n")
-  end
+  run_latex_until_settled(engine, stem, srcdir, outdir)
   for _, page in ipairs(svg_pages(stem, outdir)) do
     os.remove(page.path)
   end
