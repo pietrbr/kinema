@@ -16,8 +16,8 @@
   let steps = [];
   let raf = 0;
 
-  for (const img of document.querySelectorAll("image[data-zl-src]")) {
-    img.setAttribute("href", window.ZL_IMAGES[img.dataset.zlSrc]);
+  for (const img of document.querySelectorAll("image[data-kn-src]")) {
+    img.setAttribute("href", window.KN_IMAGES[img.dataset.knSrc]);
   }
 
   const clamp = (x) => Math.max(0, Math.min(1, x));
@@ -228,8 +228,8 @@
 
   function named(page, kind) {
     const map = new Map();
-    for (const g of page.querySelectorAll(`[data-zl-${kind}]`)) {
-      map.set(g.getAttribute(`data-zl-${kind}`), g);
+    for (const g of page.querySelectorAll(`[data-kn-${kind}]`)) {
+      map.set(g.getAttribute(`data-kn-${kind}`), g);
     }
     return map;
   }
@@ -241,8 +241,8 @@
   }
 
   function frameOf(page) {
-    const marker = page.querySelector("[data-zl-frame]");
-    return { frame: marker?.dataset.zlFrame, transition: marker?.dataset.zlTransition || "" };
+    const marker = page.querySelector("[data-kn-frame]");
+    return { frame: marker?.dataset.knFrame, transition: marker?.dataset.knTransition || "" };
   }
 
   function sameFrame(a, b) {
@@ -370,7 +370,7 @@
     }
     const staged = !sameFrame(a, b);
     const phases = staged ? { out: [0, 0.25], morph: [0.2, 0.8], in: [0.75, 1] } : { out: null, morph: [0, 1], in: [0.35, 1] };
-    const pictures = [...hidden].filter((g) => a.contains(g)).map((g) => g.closest("[data-zl-picture]")).filter(Boolean);
+    const pictures = [...hidden].filter((g) => a.contains(g)).map((g) => g.closest("[data-kn-picture]")).filter(Boolean);
     const faded = staged ? [...new Set(pictures)] : [];
     const mix = (x, y, e) => {
       if (!x.rgba || !y.rgba) {
@@ -445,7 +445,7 @@
     const target = forward ? pair[0] : pair[1];
     show(overview, 1);
     show(detail, 2);
-    const picture = target.closest("[data-zl-picture]");
+    const picture = target.closest("[data-kn-picture]");
     if (!picture) {
       reset(b);
       return null;
@@ -603,5 +603,5 @@
 
   const start = Number.parseInt(params.get("page") ?? "1", 10);
   setCurrent(Math.max(0, Math.min(pages.length - 1, (Number.isNaN(start) ? 1 : start) - 1)));
-  window.zlides = { go, get page() { return current + 1; }, get busy() { return steps.length > 0; } };
+  window.kinetic = { go, get page() { return current + 1; }, get busy() { return steps.length > 0; } };
 })();

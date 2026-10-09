@@ -5,7 +5,7 @@
 \usepackage{booktabs}
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{zlides}
+\usepackage{kinetic}
 \usepackage[hidelinks]{hyperref}
 
 \lstset{
@@ -18,7 +18,7 @@
   xrightmargin=1em,
 }
 \emergencystretch=3em
-\newcommand{\pkg}{\textsf{zlides}}
+\newcommand{\pkg}{\textsf{kinetic}}
 \newcommand{\cmd}[1]{\texttt{#1}}
 
 \title{The \pkg{} package\\[0.3em]\large Browser animations between Beamer overlays}
@@ -33,7 +33,7 @@
 \pkg{} adds motion to Beamer slides. You give a name to a TikZ scope in your
 \cmd{.tex} file. The PDF build ignores the names and gives the usual overlays.
 An overlay is one step of a Beamer frame, and each overlay becomes one page. The
-\cmd{zlides} command builds one HTML file, and the browser animates the named
+\cmd{kinetic} command builds one HTML file, and the browser animates the named
 shapes from one page to the next.
 
 You keep one source file with two outputs. The PDF works for print, for handouts,
@@ -50,10 +50,10 @@ The HTML build has three steps:
 \begin{enumerate}
 	\item \cmd{latex} compiles the deck to DVI, the TeX output format before PDF.
 	      The build selects the \cmd{dvisvgm} driver of PGF. With this driver, each
-	      named scope becomes an SVG group with a \cmd{data-zl-*} attribute.
+	      named scope becomes an SVG group with a \cmd{data-kn-*} attribute.
 	\item \cmd{dvisvgm} converts each DVI page into one SVG file. It draws the text
 	      as shapes, so the text looks identical to the PDF.
-	\item The \cmd{zlides} script puts all SVG pages, all images, and the viewer
+	\item The \cmd{kinetic} script puts all SVG pages, all images, and the viewer
 	      into one HTML file. In the browser, the viewer finds groups with the same name
 	      on two consecutive pages and animates between them.
 \end{enumerate}
@@ -83,21 +83,21 @@ Run the install script from the repository:
 \end{lstlisting}
 The script makes three symbolic links:
 \begin{itemize}
-	\item \cmd{tex/latex/zlides} into \cmd{TEXMFHOME/tex/latex}, for the package.
-	\item \cmd{scripts/zlides} into \cmd{TEXMFHOME/scripts}, for the build script.
-	\item \cmd{scripts/zlides/zlides.lua} as \cmd{\textasciitilde/.local/bin/zlides},
+	\item \cmd{tex/latex/kinetic} into \cmd{TEXMFHOME/tex/latex}, for the package.
+	\item \cmd{scripts/kinetic} into \cmd{TEXMFHOME/scripts}, for the build script.
+	\item \cmd{scripts/kinetic/kinetic.lua} as \cmd{\textasciitilde/.local/bin/kinetic},
 	      for the command.
 \end{itemize}
-To put the command in a different directory, set \cmd{ZLIDES\_BINDIR} before you
+To put the command in a different directory, set \cmd{KINETIC\_BINDIR} before you
 run the script. If that directory is not on your \cmd{PATH}, the script tells you.
 To remove the three links, run \cmd{./install.sh --uninstall}. The script removes
 each path only if it is a symbolic link.
 
 The repository follows the TeX Directory Structure. To install by hand, copy the
 \cmd{tex} and \cmd{scripts} directories into a TeX tree, and make
-\cmd{zlides.lua} executable.
+\cmd{kinetic.lua} executable.
 
-On Overleaf, upload \cmd{zlides.sty} into the project. Overleaf then builds the
+On Overleaf, upload \cmd{kinetic.sty} into the project. Overleaf then builds the
 PDF. The HTML build runs only on your computer.
 
 \section{Writing a deck}
@@ -107,9 +107,9 @@ PDF. The HTML build runs only on your computer.
 Load the package after the document class. The package loads TikZ.
 \begin{lstlisting}
 \documentclass{beamer}
-\usepackage{zlides}
+\usepackage{kinetic}
 \end{lstlisting}
-The deck needs no other change for the HTML build. The \cmd{zlides} command
+The deck needs no other change for the HTML build. The \cmd{kinetic} command
 selects the SVG driver and passes the \cmd{dvisvgm} option to \cmd{graphicx} and
 \cmd{xcolor} on the command line.
 
@@ -195,8 +195,8 @@ rectangle, and changes color from blue to red.
 
 To set a transition, put one of these commands in the frame:
 \begin{lstlisting}
-\zltransition{push}
-\zltransition{fade}
+\kntransition{push}
+\kntransition{fade}
 \end{lstlisting}
 If the deck enters that frame from another frame, the transition runs. A push
 slides the old page out and the new page in from the side. A fade blends the new
@@ -215,7 +215,7 @@ and uses the first one that applies:
 	\item A morph, if both pages have \cmd{morph} or \cmd{move} names whose shapes
 	      differ. The viewer skips a pair whose shapes and colors are identical.
 	\item A frame transition, if the new page starts a frame with
-	      \cmd{\textbackslash zltransition}.
+	      \cmd{\textbackslash kntransition}.
 \end{enumerate}
 If none applies, the page changes at once. After the main animation, fade and
 draw-on groups that are new on this page run. If you press a key during an
@@ -308,12 +308,12 @@ parameter multiplies all of them.
 
 \subsection{The HTML deck}
 
-Run \cmd{zlides} with the source file:
+Run \cmd{kinetic} with the source file:
 \begin{lstlisting}
-zlides talk.tex
+kinetic talk.tex
 \end{lstlisting}
 The command writes \cmd{talk.html} next to \cmd{talk.tex}. It keeps the
-intermediate files in the directory \cmd{talk.zlides/}, so they do not mix with
+intermediate files in the directory \cmd{talk.kinetic/}, so they do not mix with
 the files of the PDF build. It runs \cmd{latex} again while the \cmd{.aux} file
 changes or the log asks for a rerun, with at most three runs in total. If the
 references still change after three runs, it prints a warning. It then runs
@@ -321,17 +321,17 @@ references still change after three runs, it prints a warning. It then runs
 
 If your deck needs LuaLaTeX, use the \cmd{dvilualatex} engine:
 \begin{lstlisting}
-zlides --engine=dvilualatex talk.tex
+kinetic --engine=dvilualatex talk.tex
 \end{lstlisting}
 The SVG conversion reads DVI, so plain \cmd{lualatex} does not work for the HTML
-build. \cmd{zlides} accepts only \cmd{latex} and \cmd{dvilualatex}.
+build. \cmd{kinetic} accepts only \cmd{latex} and \cmd{dvilualatex}.
 
 The HTML build does not run BibTeX or Biber. If the PDF build wrote
-\cmd{talk.bbl} next to \cmd{talk.tex}, \cmd{zlides} copies it, and the
+\cmd{talk.bbl} next to \cmd{talk.tex}, \cmd{kinetic} copies it, and the
 citations show in the HTML deck. Build the PDF first if the deck has citations. Decks that load OpenType fonts through \cmd{fontspec} were not tested.
 
-If \cmd{latex} fails, \cmd{zlides} prints the first error from the log and stops.
-The full log is \cmd{talk.zlides/talk.log}.
+If \cmd{latex} fails, \cmd{kinetic} prints the first error from the log and stops.
+The full log is \cmd{talk.kinetic/talk.log}.
 
 \subsection{Images and figures}
 
@@ -341,8 +341,8 @@ search path. \cmd{dvisvgm} cannot read PDF files without tools outside TeX, so
 the HTML build handles figures in these ways:
 \begin{itemize}
 	\item PDF figures included with \cmd{\textbackslash includegraphics}: the
-	      package lists each PDF and page in \cmd{talk.zlides/talk.zlpdf}.
-	      \cmd{zlides} converts each one to SVG with \cmd{pdftocairo} from Poppler,
+	      package lists each PDF and page in \cmd{talk.kinetic/talk.knpdf}.
+	      \cmd{kinetic} converts each one to SVG with \cmd{pdftocairo} from Poppler,
 	      or with \cmd{pdf2svg} if \cmd{pdftocairo} fails, and runs LaTeX once more
 	      to put the SVG files in place. The name of each SVG file contains a hash of
 	      the PDF content, so a changed PDF gets a new SVG. A conversion takes about
@@ -365,7 +365,7 @@ The \cmd{trim}, \cmd{viewport}, \cmd{clip}, and \cmd{pagebox} options of
 \cmd{\textbackslash includegraphics} are not supported for converted PDF figures:
 the SVG always shows the whole page. For \cmd{clip}, \pkg{} prints a warning. If
 a figure exists as PDF and as EPS, the HTML build uses the PDF. If \cmd{dvisvgm} reports an error,
-\cmd{zlides} prints it.
+\cmd{kinetic} prints it.
 
 \subsection{The PDF}
 
@@ -374,10 +374,10 @@ The keys do nothing in the PDF, and each overlay becomes one page.
 
 \subsection{Both outputs with latexmk}
 
-latexmk can run \cmd{zlides} after each successful PDF build. Add this line to
+latexmk can run \cmd{kinetic} after each successful PDF build. Add this line to
 your \cmd{latexmkrc}:
 \begin{lstlisting}
-$success_cmd = 'zlides %S';
+$success_cmd = 'kinetic %S';
 \end{lstlisting}
 latexmk runs \cmd{\$success\_cmd} only in watch mode, \cmd{latexmk -pvc}. vimtex
 uses watch mode, so the HTML deck follows each save. Each save then compiles the
@@ -443,11 +443,11 @@ no network connection.
 
 The repository contains these files:
 \begin{description}
-	\item[\cmd{tex/latex/zlides/zlides.sty}] the LaTeX package.
-	\item[\cmd{scripts/zlides/zlides.lua}] the \cmd{zlides} command.
-	\item[\cmd{scripts/zlides/zlides-viewer.js}] the viewer that runs in the browser.
-	\item[\cmd{scripts/zlides/zlides-template.html}] the page that holds the deck.
-	\item[\cmd{doc/latex/zlides/}] this manual.
+	\item[\cmd{tex/latex/kinetic/kinetic.sty}] the LaTeX package.
+	\item[\cmd{scripts/kinetic/kinetic.lua}] the \cmd{kinetic} command.
+	\item[\cmd{scripts/kinetic/kinetic-viewer.js}] the viewer that runs in the browser.
+	\item[\cmd{scripts/kinetic/kinetic-template.html}] the page that holds the deck.
+	\item[\cmd{doc/latex/kinetic/}] this manual.
 	\item[\cmd{examples/}] the example deck, its outputs, and its \cmd{latexmkrc}.
 	\item[\cmd{tests/check\_browsers.py}] the browser test.
 	\item[\cmd{tests/check\_morph.py}, \cmd{tests/check\_build.py}] the morph test and the build test for PDF figures.
@@ -457,12 +457,12 @@ The repository contains these files:
 \subsection{Building from the repository}
 
 To build the example deck without installing \pkg{}, run the script with
-\cmd{texlua} from the repository. The script finds \cmd{zlides.sty} in the
+\cmd{texlua} from the repository. The script finds \cmd{kinetic.sty} in the
 repository by itself.
 \begin{lstlisting}
-texlua scripts/zlides/zlides.lua examples/showcase.tex
+texlua scripts/kinetic/kinetic.lua examples/showcase.tex
 \end{lstlisting}
-To build this manual, run \cmd{latexmk} in \cmd{doc/latex/zlides}. Its
+To build this manual, run \cmd{latexmk} in \cmd{doc/latex/kinetic}. Its
 \cmd{latexmkrc} adds the package directory to the TeX search path.
 
 \subsection{Browser test}

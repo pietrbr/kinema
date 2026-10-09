@@ -33,8 +33,8 @@ def walk(page, url: str, count: int) -> list[int]:
     for key in ("ArrowRight", "ArrowLeft"):
         for _ in range(count - 1):
             page.keyboard.press(key)
-            page.wait_for_function("!window.zlides.busy", timeout=STEP_TIMEOUT_MS)
-        ends.append(page.evaluate("window.zlides.page"))
+            page.wait_for_function("!window.kinetic.busy", timeout=STEP_TIMEOUT_MS)
+        ends.append(page.evaluate("window.kinetic.page"))
     return ends
 
 

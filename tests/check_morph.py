@@ -12,7 +12,7 @@ from playwright.sync_api import Error, sync_playwright
 MID = 0.5
 OVERLAY_PATHS = "[...document.querySelectorAll('#overlay path')].map((p) => [p.getAttribute('d'), p.getAttribute('fill-rule')])"
 LABEL_VISIBLE = (
-    "[...document.querySelectorAll('.page')[4].querySelectorAll('[data-zl-morph] use')]"
+    "[...document.querySelectorAll('.page')[4].querySelectorAll('[data-kn-morph] use')]"
     ".some((u) => getComputedStyle(u).visibility !== 'hidden')"
 )
 

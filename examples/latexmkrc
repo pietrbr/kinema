@@ -1,5 +1,5 @@
 # Build the PDF with pdflatex, and rebuild the HTML deck after each successful
 # run in watch mode (latexmk -pvc, which vimtex uses).
 $pdf_mode = 1;
-ensure_path('TEXINPUTS', '../tex/latex/zlides//');
-$success_cmd = 'zlides %S';
+ensure_path('TEXINPUTS', '../tex/latex/kinetic//');
+$success_cmd = 'kinetic %S';

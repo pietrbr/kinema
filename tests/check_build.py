@@ -13,11 +13,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 DECK = ROOT / "tests" / "fixtures" / "pdf-figure.tex"
 TEX_TOOLS = ("texlua", "latex", "dvisvgm", "kpsewhich", "extractbb")
-BUILD = ["texlua", str(ROOT / "scripts" / "zlides" / "zlides.lua"), str(DECK)]
+BUILD = ["texlua", str(ROOT / "scripts" / "kinetic" / "kinetic.lua"), str(DECK)]
 
 
 def build(path: str) -> subprocess.CompletedProcess:
-    shutil.rmtree(DECK.with_suffix(".zlides"), ignore_errors=True)
+    shutil.rmtree(DECK.with_suffix(".kinetic"), ignore_errors=True)
     return subprocess.run(BUILD, capture_output=True, text=True, env={**os.environ, "PATH": path})
 
 

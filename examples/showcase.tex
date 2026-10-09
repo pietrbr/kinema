@@ -1,5 +1,5 @@
 \documentclass[10pt, aspectratio=169]{beamer}
-\usepackage{zlides}
+\usepackage{kinetic}
 \usetikzlibrary{arrows.meta}
 \setbeamertemplate{navigation symbols}{}
 
@@ -34,7 +34,7 @@
     \fill[outerbox, tierB!10, draw=tierB] (7.6,2.55) rectangle (12.1,4.55);
   \end{scope}
   \node[title, text=tierB!55!black] at (7.72,4.47) {Build};
-  \node[badge] at (11.98,4.47) {\texttt{zlides}};
+  \node[badge] at (11.98,4.47) {\texttt{kinetic}};
   \draw[block, fill=tierB!28, draw=tierB] (8.1,2.85) rectangle (11.6,3.95);
   \node at (9.85,3.4) {\textbf{dvisvgm}\\ one SVG per page};
   \fill[outerbox, tierC!10, draw=tierC] (0,0.08) rectangle (12.1,1.7);
@@ -64,7 +64,7 @@
     \end{scope}}%
 }
 
-\title{zlides showcase}
+\title{kinetic showcase}
 \subtitle{Animated Beamer slides in the browser}
 \date{}
 
@@ -169,7 +169,7 @@
 \end{frame}
 
 \begin{frame}{Default Animation Durations}
-  \zltransition{push}
+  \kntransition{push}
   \centering
   \begin{tikzpicture}[font=\footnotesize]
     \useasboundingbox (-1,-0.8) rectangle (11,5);
@@ -199,7 +199,7 @@
 \end{frame}
 
 \begin{frame}[fragile]{How the Morph Is Written}
-  \zltransition{fade}
+  \kntransition{fade}
   Give a scope the same name on two consecutive pages:
 \begin{semiverbatim}\small
 \\only<1>\{\\begin\{scope\}[morph=box]
@@ -243,7 +243,7 @@
 \end{frame}
 
 \begin{frame}{One Source, Two Outputs}
-  \zltransition{fade}
+  \kntransition{fade}
   \centering\vfill
   {\Large A PDF for print and for Overleaf,\\[0.3em]
     an HTML deck with motion for the talk.}

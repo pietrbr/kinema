@@ -1,20 +1,20 @@
 #!/usr/bin/env texlua
--- zlides: build a self-contained HTML deck from a Beamer source.
--- Usage: zlides [--engine=latex|dvilualatex] <file.tex>
+-- kinetic: build a self-contained HTML deck from a Beamer source.
+-- Usage: kinetic [--engine=latex|dvilualatex] <file.tex>
 
 local lfs = require("lfs")
 local mime = require("mime")
 
 local MIME = { png = "image/png", jpg = "image/jpeg", jpeg = "image/jpeg", gif = "image/gif", svg = "image/svg+xml" }
 local MAX_LATEX_RUNS = 4
-local SVG_PREFIX = "zl-"
+local SVG_PREFIX = "kn-"
 local ERROR_LINES = 12
 local ENGINES = { latex = true, dvilualatex = true }
 local HTML_SETUP = [[\def\pgfsysdriver{pgfsys-dvisvgm.def}]]
   .. [[\PassOptionsToPackage{dvisvgm}{graphicx}\PassOptionsToPackage{dvisvgm}{xcolor}]]
 
 local function fail(msg)
-  io.stderr:write("zlides: " .. msg .. "\n")
+  io.stderr:write("kinetic: " .. msg .. "\n")
   os.exit(1)
 end
 
@@ -109,7 +109,7 @@ end
 local function run_latex(engine, stem, outdir)
   local cmd = string.format("%s -interaction=nonstopmode -output-directory=%s -jobname=%s %s",
     engine, quote(outdir), quote(stem),
-    quote(HTML_SETUP .. "\\def\\zloutdir{" .. stem .. ".zlides/}\\input{" .. stem .. ".tex}"))
+    quote(HTML_SETUP .. "\\def\\knoutdir{" .. stem .. ".kinetic/}\\input{" .. stem .. ".tex}"))
   local log_path = outdir .. "/" .. stem .. ".log"
   os.remove(log_path)
   local ok, output = capture(cmd)
@@ -155,7 +155,7 @@ end
 local function convert_pdfs(stem, srcdir, outdir)
   local converted = 0
   local wanted = {}
-  for line in read_optional(outdir .. "/" .. stem .. ".zlpdf"):gmatch("[^\n]+") do
+  for line in read_optional(outdir .. "/" .. stem .. ".knpdf"):gmatch("[^\n]+") do
     local key, page, file = line:match("^(%x+) (%d+) (.+)$")
     if not key then
       goto continue
@@ -194,7 +194,7 @@ local function run_latex_until_settled(engine, stem, srcdir, outdir)
     end
     before = after
   end
-  io.stderr:write("zlides: references still changed after " .. MAX_LATEX_RUNS .. " LaTeX runs\n")
+  io.stderr:write("kinetic: references still changed after " .. MAX_LATEX_RUNS .. " LaTeX runs\n")
 end
 
 local function run_dvisvgm(stem, outdir)
@@ -205,7 +205,7 @@ local function run_dvisvgm(stem, outdir)
   end
   for line in output:gmatch("[^\n]+") do
     if line:find("ERROR", 1, true) then
-      io.stderr:write("zlides: dvisvgm: " .. line .. "\n")
+      io.stderr:write("kinetic: dvisvgm: " .. line .. "\n")
     end
   end
 end
@@ -233,7 +233,7 @@ local function page_markup(svg, n, srcdir, images)
       local ext = (name:match("%.(%w+)$") or ""):lower()
       images[name] = "data:" .. (MIME[ext] or "application/octet-stream") .. ";base64," .. (mime.b64(read(find_image(name, srcdir))) or "")
     end
-    return "data-zl-src='" .. name .. "'"
+    return "data-kn-src='" .. name .. "'"
   end)
   return '<div class="page">' .. svg .. "</div>"
 end
@@ -255,7 +255,7 @@ local function main()
     fail("unsupported engine " .. engine .. "; use latex or dvilualatex")
   end
   if not tex then
-    fail("usage: zlides [--engine=latex|dvilualatex] <file.tex>")
+    fail("usage: kinetic [--engine=latex|dvilualatex] <file.tex>")
   end
   if not exists(tex) then
     fail("no such file: " .. tex)
@@ -263,10 +263,10 @@ local function main()
   local srcdir = physical_dir(tex)
   lfs.chdir(srcdir)
   local stem = tex:match("([^/]+)%.tex$") or fail("expected a .tex file")
-  local outdir = srcdir .. "/" .. stem .. ".zlides"
+  local outdir = srcdir .. "/" .. stem .. ".kinetic"
   lfs.mkdir(outdir)
-  local sty = SCRIPT_DIR .. "/../../tex/latex/zlides"
-  if exists(sty .. "/zlides.sty") then
+  local sty = SCRIPT_DIR .. "/../../tex/latex/kinetic"
+  if exists(sty .. "/kinetic.sty") then
     os.setenv("TEXINPUTS", sty .. "//:" .. (os.getenv("TEXINPUTS") or ""))
   end
 
@@ -290,8 +290,8 @@ local function main()
   for name, uri in pairs(images) do
     entries[#entries + 1] = json_string(name) .. ":" .. json_string(uri)
   end
-  local html = read(script_file("zlides-template.html"))
-  html = replace(html, "/*VIEWER*/", read(script_file("zlides-viewer.js")))
+  local html = read(script_file("kinetic-template.html"))
+  html = replace(html, "/*VIEWER*/", read(script_file("kinetic-viewer.js")))
   html = replace(html, "<!--PAGES-->", table.concat(markup, "\n"))
   html = replace(html, "/*IMAGES*/", "{" .. table.concat(entries, ",") .. "}")
   local out = srcdir .. "/" .. stem .. ".html"
