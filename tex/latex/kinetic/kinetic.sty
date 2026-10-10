@@ -10,68 +10,68 @@
 % from it in \knoutdir, because dvisvgm cannot read PDF files on its own.
 \def\kn@driver{pgfsys-dvisvgm.def}
 \def\kn@keys#1{%
-  \tikzset{#1/.style={
-    execute at begin scope={\pgfsysprotocol@literal{<g data-kn-#1="##1">}},
-    execute at end scope={\pgfsysprotocol@literal{</g>}}}}}
+	\tikzset{#1/.style={
+				execute at begin scope={\pgfsysprotocol@literal{<g data-kn-#1="##1">}},
+				execute at end scope={\pgfsysprotocol@literal{</g>}}}}}
 \gdef\kn@transition{}
 \newcount\kn@frame
 \newcommand{\kntransition}[1]{\gdef\kn@transition{#1}}
 \ifx\pgfsysdriver\kn@driver
-  \kn@keys{morph}\kn@keys{move}\kn@keys{zoom}\kn@keys{fade}\kn@keys{drawon}
-  \tikzset{every picture/.append style={
-    execute at begin picture={\pgfsysprotocol@literal{<g data-kn-picture="">}},
-    execute at end picture={\pgfsysprotocol@literal{</g>}}}}
-  \PassOptionsToPackage{mode=tex}{standalone}
-  \RequirePackage{pdftexcmds}
-  \providecommand{\knoutdir}{}
-  \newwrite\kn@pdflist
-  \def\kn@noeps#1{\PackageError{kinetic}{The HTML deck cannot show #1.
-    Convert it to PDF or SVG}{}}
-  \def\kn@cropbox{cropbox}
-  \def\kn@nocrop#1#2{\PackageError{kinetic}{The HTML deck does not support the
-    #2 option of \string\includegraphics\space for #1. Crop the PDF file itself,
-    for example with pdfcrop, and remove the option}{}}
-  \def\kn@nobox#1{\PackageError{kinetic}{The HTML deck shows only the crop box
-    of #1. Remove the pagebox option, or make a PDF whose crop box covers the
-    area you need}{}}
-  \def\kn@pdf#1{%
-    \ifx\Gin@viewport@code\Gin@trim\kn@nocrop{#1}{trim}\fi
-    \ifx\Gin@viewport@code\Gin@viewport\kn@nocrop{#1}{viewport}\fi
-    \ifGin@bbox\kn@nocrop{#1}{bb}\fi
-    \ifx\Gin@pagebox\kn@cropbox\else\kn@nobox{#1}\fi
-    \edef\kn@page{\ifx\Gin@page\@empty 1\else\Gin@page\fi}%
-    \edef\kn@file{#1}%
-    \ifcsname kn@key@\kn@file:\kn@page\endcsname\else
-      \expandafter\xdef\csname kn@key@\kn@file:\kn@page\endcsname{%
-        \pdf@mdfivesum{\kn@file:\kn@page:\pdf@filemdfivesum{\kn@file}}}%
-      \immediate\write\kn@pdflist{\csname kn@key@\kn@file:\kn@page\endcsname
-        \space\kn@page\space\detokenize\expandafter{\kn@file}}%
-    \fi
-    \edef\kn@svg{\knoutdir kn-\csname kn@key@\kn@file:\kn@page\endcsname.svg}%
-    \IfFileExists{\kn@svg}{\kn@pdfassvg}{}}
-  \def\kn@pdfassvg{%
-    \dimen@\Gin@urx pt\advance\dimen@-\Gin@llx pt%
-    \edef\Gin@svg@real@width@bp{\strip@pt\dimen@}%
-    \dimen@\Gin@ury pt\advance\dimen@-\Gin@lly pt%
-    \edef\Gin@svg@real@height@bp{\strip@pt\dimen@}%
-    \def\Gin@llx{0}\def\Gin@lly{0}%
-    \let\Gin@urx\Gin@svg@real@width@bp
-    \let\Gin@ury\Gin@svg@real@height@bp
-    \Ginclude@bitmap{\kn@svg}}
-  \def\kn@graphics{%
-    \let\Ginclude@pdf\kn@pdf
-    \let\Ginclude@eps\kn@noeps
-    \def\Gin@extensions{.svg,.pdf,.eps,.png,.jpg,.jpeg}}
-  \immediate\openout\kn@pdflist=\jobname.knpdf
-  \ifdefined\Ginclude@pdf\kn@graphics\fi
-  \AtBeginDocument{%
-    \ifdefined\tikzexternaldisable\tikzexternaldisable\fi
-    \ifdefined\standaloneconfig\standaloneconfig{mode=tex}\fi
-    \kn@graphics}
-  \AtBeginEnvironment{frame}{\gdef\kn@transition{}\global\advance\kn@frame by 1 }
-  \AddToHook{shipout/foreground}{\put(0,0){\special{dvisvgm:raw
-    <g data-kn-frame='\the\kn@frame' data-kn-transition='\kn@transition'/>}}}
+	\kn@keys{morph}\kn@keys{move}\kn@keys{zoom}\kn@keys{fade}\kn@keys{drawon}
+	\tikzset{every picture/.append style={
+				execute at begin picture={\pgfsysprotocol@literal{<g data-kn-picture="">}},
+				execute at end picture={\pgfsysprotocol@literal{</g>}}}}
+	\PassOptionsToPackage{mode=tex}{standalone}
+	\RequirePackage{pdftexcmds}
+	\providecommand{\knoutdir}{}
+	\newwrite\kn@pdflist
+	\def\kn@noeps#1{\PackageError{kinetic}{The HTML deck cannot show #1.
+			Convert it to PDF or SVG}{}}
+	\def\kn@cropbox{cropbox}
+	\def\kn@nocrop#1#2{\PackageError{kinetic}{The HTML deck does not support the
+			#2 option of \string\includegraphics\space for #1. Crop the PDF file itself,
+			for example with pdfcrop, and remove the option}{}}
+	\def\kn@nobox#1{\PackageError{kinetic}{The HTML deck shows only the crop box
+			of #1. Remove the pagebox option, or make a PDF whose crop box covers the
+			area you need}{}}
+	\def\kn@pdf#1{%
+		\ifx\Gin@viewport@code\Gin@trim\kn@nocrop{#1}{trim}\fi
+		\ifx\Gin@viewport@code\Gin@viewport\kn@nocrop{#1}{viewport}\fi
+		\ifGin@bbox\kn@nocrop{#1}{bb}\fi
+		\ifx\Gin@pagebox\kn@cropbox\else\kn@nobox{#1}\fi
+		\edef\kn@page{\ifx\Gin@page\@empty 1\else\Gin@page\fi}%
+		\edef\kn@file{#1}%
+		\ifcsname kn@key@\kn@file:\kn@page\endcsname\else
+			\expandafter\xdef\csname kn@key@\kn@file:\kn@page\endcsname{%
+				\pdf@mdfivesum{\kn@file:\kn@page:\pdf@filemdfivesum{\kn@file}}}%
+			\immediate\write\kn@pdflist{\csname kn@key@\kn@file:\kn@page\endcsname
+				\space\kn@page\space\detokenize\expandafter{\kn@file}}%
+		\fi
+		\edef\kn@svg{\knoutdir kn-\csname kn@key@\kn@file:\kn@page\endcsname.svg}%
+		\IfFileExists{\kn@svg}{\kn@pdfassvg}{}}
+	\def\kn@pdfassvg{%
+		\dimen@\Gin@urx pt\advance\dimen@-\Gin@llx pt%
+		\edef\Gin@svg@real@width@bp{\strip@pt\dimen@}%
+		\dimen@\Gin@ury pt\advance\dimen@-\Gin@lly pt%
+		\edef\Gin@svg@real@height@bp{\strip@pt\dimen@}%
+		\def\Gin@llx{0}\def\Gin@lly{0}%
+		\let\Gin@urx\Gin@svg@real@width@bp
+		\let\Gin@ury\Gin@svg@real@height@bp
+		\Ginclude@bitmap{\kn@svg}}
+	\def\kn@graphics{%
+		\let\Ginclude@pdf\kn@pdf
+		\let\Ginclude@eps\kn@noeps
+		\def\Gin@extensions{.svg,.pdf,.eps,.png,.jpg,.jpeg}}
+	\immediate\openout\kn@pdflist=\jobname.knpdf
+	\ifdefined\Ginclude@pdf\kn@graphics\fi
+	\AtBeginDocument{%
+		\ifdefined\tikzexternaldisable\tikzexternaldisable\fi
+		\ifdefined\standaloneconfig\standaloneconfig{mode=tex}\fi
+		\kn@graphics}
+	\AtBeginEnvironment{frame}{\gdef\kn@transition{}\global\advance\kn@frame by 1 }
+	\AddToHook{shipout/foreground}{\put(0,0){\special{dvisvgm:raw
+				<g data-kn-frame='\the\kn@frame' data-kn-transition='\kn@transition'/>}}}
 \else
-  \tikzset{morph/.style={}, move/.style={}, zoom/.style={}, fade/.style={}, drawon/.style={}}
+	\tikzset{morph/.style={}, move/.style={}, zoom/.style={}, fade/.style={}, drawon/.style={}}
 \fi
 \makeatother

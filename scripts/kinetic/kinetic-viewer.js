@@ -26,14 +26,20 @@
   const lerp = (a, b, t) => a + (b - a) * t;
 
   function toRoot(el) {
-    return DOMMatrix.fromMatrix(el.ownerSVGElement.getScreenCTM().inverse().multiply(el.getScreenCTM()));
+    return DOMMatrix.fromMatrix(
+      el.ownerSVGElement.getScreenCTM().inverse().multiply(el.getScreenCTM()),
+    );
   }
 
   function rootRect(el) {
     const b = el.getBBox();
     const m = toRoot(el);
-    const pts = [[b.x, b.y], [b.x + b.width, b.y], [b.x, b.y + b.height], [b.x + b.width, b.y + b.height]]
-      .map(([x, y]) => new DOMPoint(x, y).matrixTransform(m));
+    const pts = [
+      [b.x, b.y],
+      [b.x + b.width, b.y],
+      [b.x, b.y + b.height],
+      [b.x + b.width, b.y + b.height],
+    ].map(([x, y]) => new DOMPoint(x, y).matrixTransform(m));
     const xs = pts.map((p) => p.x);
     const ys = pts.map((p) => p.y);
     const x = Math.min(...xs);
@@ -54,17 +60,28 @@
   }
 
   function lerpRect(a, b, t) {
-    return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), w: lerp(a.w, b.w, t), h: lerp(a.h, b.h, t) };
+    return {
+      x: lerp(a.x, b.x, t),
+      y: lerp(a.y, b.y, t),
+      w: lerp(a.w, b.w, t),
+      h: lerp(a.h, b.h, t),
+    };
   }
 
-  const probe = document.body.appendChild(document.createElementNS(SVG_NS, "svg"));
-  probe.setAttribute("style", "position:absolute;width:0;height:0;visibility:hidden");
+  const probe = document.body.appendChild(
+    document.createElementNS(SVG_NS, "svg"),
+  );
+  probe.setAttribute(
+    "style",
+    "position:absolute;width:0;height:0;visibility:hidden",
+  );
   const probePath = probe.appendChild(document.createElementNS(SVG_NS, "path"));
   const ARITY = { M: 2, L: 2, H: 1, V: 1, C: 6, S: 4, Q: 4, T: 2, A: 7, Z: 0 };
 
   // Outlines (subpaths) of a path: { closed, segs }, each segment a standalone absolute path string.
   function outlines(d) {
-    const tokens = d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?/gi) ?? [];
+    const tokens =
+      d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:e[-+]?\d+)?/gi) ?? [];
     const found = [];
     let segs = [];
     let closed = false;
@@ -78,7 +95,10 @@
       segs.push(`M${cur[0]} ${cur[1]}${type}${args.join(" ")}`);
       cur = end;
     };
-    const reflect = (kind) => (ctrl?.kind === kind ? [2 * cur[0] - ctrl.pt[0], 2 * cur[1] - ctrl.pt[1]] : cur);
+    const reflect = (kind) =>
+      ctrl?.kind === kind
+        ? [2 * cur[0] - ctrl.pt[0], 2 * cur[1] - ctrl.pt[1]]
+        : cur;
     while (i < tokens.length) {
       if (/[a-zA-Z]/.test(tokens[i])) {
         cmd = tokens[i++];
@@ -102,7 +122,8 @@
         ctrl = null;
       } else if (up === "L" || up === "H" || up === "V") {
         const x = up === "V" ? cur[0] : args[0] + ox;
-        const y = up === "H" ? cur[1] : up === "V" ? args[0] + oy : args[1] + oy;
+        const y =
+          up === "H" ? cur[1] : up === "V" ? args[0] + oy : args[1] + oy;
         push("L", [x, y], [x, y]);
         ctrl = null;
       } else if (up === "C" || up === "S") {
@@ -136,7 +157,10 @@
       return { d: s, len: probePath.getTotalLength(), from: 0, to: 1 };
     };
     return found
-      .map((o) => ({ closed: o.closed, segs: o.segs.map(measure).filter((s) => s.len > 1e-6) }))
+      .map((o) => ({
+        closed: o.closed,
+        segs: o.segs.map(measure).filter((s) => s.len > 1e-6),
+      }))
       .filter((o) => o.segs.length > 0);
   }
 
@@ -183,7 +207,9 @@
     const from = samplePoints(equalize(oa.segs, n), ma, per, closed);
     const to = samplePoints(equalize(ob.segs, n), mb, per, closed);
     const total = from.length;
-    const reversed = closed ? to.map((_, i) => to[(total - i) % total]) : [...to].reverse();
+    const reversed = closed
+      ? to.map((_, i) => to[(total - i) % total])
+      : [...to].reverse();
     const step = closed ? per : total;
     let best = { cost: Infinity, pts: to, k: 0 };
     for (const pts of [to, reversed]) {
@@ -198,7 +224,12 @@
         }
       }
     }
-    return { from, to: best.pts.map((_, i) => best.pts[(i + best.k) % total]), closed, cost: best.cost / total };
+    return {
+      from,
+      to: best.pts.map((_, i) => best.pts[(i + best.k) % total]),
+      closed,
+      cost: best.cost / total,
+    };
   }
 
   function correspond(pa, pb, ma, mb) {
@@ -208,7 +239,9 @@
     if (count === 0) {
       return null;
     }
-    const subs = oa.slice(0, count).map((o, k) => matchOutline(o, ob[k], ma, mb));
+    const subs = oa
+      .slice(0, count)
+      .map((o, k) => matchOutline(o, ob[k], ma, mb));
     return { subs, cost: Math.max(...subs.map((sub) => sub.cost)) };
   }
 
@@ -216,10 +249,20 @@
     const style = getComputedStyle(el);
     const color = (v) => {
       const m = v.match(/^rgba?\(([^)]*)\)$/);
-      const rgba = m ? m[1].split(/[\s,/]+/).filter(Boolean).map(Number) : null;
+      const rgba = m
+        ? m[1]
+            .split(/[\s,/]+/)
+            .filter(Boolean)
+            .map(Number)
+        : null;
       return { raw: v, rgba: rgba && [...rgba.slice(0, 3), rgba[3] ?? 1] };
     };
-    return { fill: color(style.fill), stroke: color(style.stroke), width: parseFloat(style.strokeWidth) || 0, rule: style.fillRule };
+    return {
+      fill: color(style.fill),
+      stroke: color(style.stroke),
+      width: parseFloat(style.strokeWidth) || 0,
+      rule: style.fillRule,
+    };
   }
 
   function samePaint(a, b) {
@@ -237,12 +280,17 @@
   function pairs(a, b, kind) {
     const from = named(a, kind);
     const to = named(b, kind);
-    return [...from.keys()].filter((k) => to.has(k)).map((k) => [from.get(k), to.get(k)]);
+    return [...from.keys()]
+      .filter((k) => to.has(k))
+      .map((k) => [from.get(k), to.get(k)]);
   }
 
   function frameOf(page) {
     const marker = page.querySelector("[data-kn-frame]");
-    return { frame: marker?.dataset.knFrame, transition: marker?.dataset.knTransition || "" };
+    return {
+      frame: marker?.dataset.knFrame,
+      transition: marker?.dataset.knTransition || "",
+    };
   }
 
   function sameFrame(a, b) {
@@ -255,7 +303,11 @@
   }
 
   function reset(page) {
-    page.style.display = page.style.zIndex = page.style.opacity = page.style.transform = "";
+    page.style.display =
+      page.style.zIndex =
+      page.style.opacity =
+      page.style.transform =
+        "";
   }
 
   function setCurrent(i) {
@@ -322,7 +374,9 @@
         const pb = paint(to[k]);
         const ma = toRoot(from[k]);
         const mb = toRoot(to[k]);
-        const unchanged = from[k].getAttribute("d") === to[k].getAttribute("d") && String(ma) === String(mb);
+        const unchanged =
+          from[k].getAttribute("d") === to[k].getAttribute("d") &&
+          String(ma) === String(mb);
         if (unchanged && samePaint(pa, pb)) {
           continue;
         }
@@ -348,7 +402,10 @@
       reset(b);
       return null;
     }
-    overlay.setAttribute("viewBox", b.querySelector("svg").getAttribute("viewBox"));
+    overlay.setAttribute(
+      "viewBox",
+      b.querySelector("svg").getAttribute("viewBox"),
+    );
     show(a, 1);
     for (const t of tracks) {
       t.el = overlay.appendChild(document.createElementNS(SVG_NS, "path"));
@@ -369,8 +426,13 @@
       g.style.visibility = "hidden";
     }
     const staged = !sameFrame(a, b);
-    const phases = staged ? { out: [0, 0.25], morph: [0.2, 0.8], in: [0.75, 1] } : { out: null, morph: [0, 1], in: [0.35, 1] };
-    const pictures = [...hidden].filter((g) => a.contains(g)).map((g) => g.closest("[data-kn-picture]")).filter(Boolean);
+    const phases = staged
+      ? { out: [0, 0.25], morph: [0.2, 0.8], in: [0.75, 1] }
+      : { out: null, morph: [0, 1], in: [0.35, 1] };
+    const pictures = [...hidden]
+      .filter((g) => a.contains(g))
+      .map((g) => g.closest("[data-kn-picture]"))
+      .filter(Boolean);
     const faded = staged ? [...new Set(pictures)] : [];
     const mix = (x, y, e) => {
       if (!x.rgba || !y.rgba) {
@@ -400,12 +462,21 @@
           el.setAttribute("fill-rule", to.rule);
           el.setAttribute("fill", mix(from.fill, to.fill, e));
           el.setAttribute("stroke", mix(from.stroke, to.stroke, e));
-          el.setAttribute("stroke-width", String(lerp(from.width, to.width, e)));
+          el.setAttribute(
+            "stroke-width",
+            String(lerp(from.width, to.width, e)),
+          );
         }
         for (const c of clones) {
           const r = lerpRect(c.ra, c.rb, e);
-          c.ga.setAttribute("transform", String(rectMap(c.ra, r).multiply(c.ra.m)));
-          c.gb.setAttribute("transform", String(rectMap(c.rb, r).multiply(c.rb.m)));
+          c.ga.setAttribute(
+            "transform",
+            String(rectMap(c.ra, r).multiply(c.ra.m)),
+          );
+          c.gb.setAttribute(
+            "transform",
+            String(rectMap(c.rb, r).multiply(c.rb.m)),
+          );
           c.ga.setAttribute("opacity", String(1 - e));
           c.gb.setAttribute("opacity", String(e));
         }
@@ -431,7 +502,10 @@
     }
     show(b, 2);
     const rects = pair.map(rootRect);
-    if (Math.abs(rects[0].w - rects[1].w) < EPSILON && Math.abs(rects[0].h - rects[1].h) < EPSILON) {
+    if (
+      Math.abs(rects[0].w - rects[1].w) < EPSILON &&
+      Math.abs(rects[0].h - rects[1].h) < EPSILON
+    ) {
       reset(b);
       return null;
     }
@@ -462,7 +536,10 @@
           .translate(lerp(co[0], cd[0], q), lerp(co[1], cd[1], q))
           .scale(scale ** q)
           .translate(-co[0], -co[1]);
-        picture.setAttribute("transform", String(base.inverse().multiply(z).multiply(base)));
+        picture.setAttribute(
+          "transform",
+          String(base.inverse().multiply(z).multiply(base)),
+        );
         detail.style.opacity = String(smooth(0.6, 1, q));
       },
       cleanup() {
@@ -497,8 +574,12 @@
   }
 
   function enterStep(a, b) {
-    const before = new Set([...named(a, "fade").keys(), ...named(a, "drawon").keys()]);
-    const fresh = (kind) => [...named(b, kind)].filter(([k]) => !before.has(k)).map(([, g]) => g);
+    const before = new Set([
+      ...named(a, "fade").keys(),
+      ...named(a, "drawon").keys(),
+    ]);
+    const fresh = (kind) =>
+      [...named(b, kind)].filter(([k]) => !before.has(k)).map(([, g]) => g);
     const fades = fresh("fade");
     const draws = fresh("drawon");
     if (fades.length === 0 && draws.length === 0) {
@@ -534,7 +615,10 @@
       },
       cleanup() {
         for (const el of [...fades, ...rest, ...lines.map((l) => l.el)]) {
-          el.style.opacity = el.style.strokeDasharray = el.style.strokeDashoffset = "";
+          el.style.opacity =
+            el.style.strokeDasharray =
+            el.style.strokeDashoffset =
+              "";
         }
       },
     };
@@ -551,7 +635,8 @@
     const a = pages[current];
     const b = pages[i];
     const direction = delta > 0 ? DIRECTION.forward : DIRECTION.backward;
-    const main = zoomStep(a, b) ?? morphStep(a, b) ?? frameStep(a, b, direction);
+    const main =
+      zoomStep(a, b) ?? morphStep(a, b) ?? frameStep(a, b, direction);
     if (!main) {
       setCurrent(i);
     }
@@ -602,6 +687,19 @@
   });
 
   const start = Number.parseInt(params.get("page") ?? "1", 10);
-  setCurrent(Math.max(0, Math.min(pages.length - 1, (Number.isNaN(start) ? 1 : start) - 1)));
-  window.kinetic = { go, get page() { return current + 1; }, get busy() { return steps.length > 0; } };
+  setCurrent(
+    Math.max(
+      0,
+      Math.min(pages.length - 1, (Number.isNaN(start) ? 1 : start) - 1),
+    ),
+  );
+  window.kinetic = {
+    go,
+    get page() {
+      return current + 1;
+    },
+    get busy() {
+      return steps.length > 0;
+    },
+  };
 })();

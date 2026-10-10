@@ -29,6 +29,6 @@ echo "linked $sty_link -> $repo/tex/latex/kinetic"
 echo "linked $scripts_link -> $repo/scripts/kinetic"
 echo "linked $bin_link -> $repo/scripts/kinetic/kinetic.lua"
 case ":$PATH:" in
-  *":$bindir:"*) ;;
-  *) echo "Add $bindir to PATH to run kinetic." ;;
+*":$bindir:"*) ;;
+*) echo "Add $bindir to PATH to run kinetic." ;;
 esac

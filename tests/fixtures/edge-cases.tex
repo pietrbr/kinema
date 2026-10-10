@@ -6,35 +6,35 @@
 \begin{document}
 
 \begin{frame}{Zero-height move and zero-length morph}
-  \begin{tikzpicture}
-    \useasboundingbox (-1,-1) rectangle (8,3);
-    \only<1>{\begin{scope}[move=line]\draw (0,0) -- (3,0);\end{scope}}
-    \only<2>{\begin{scope}[move=line]\draw (0,1) -- (3,1);\end{scope}}
-    \only<1>{\begin{scope}[morph=dot]\draw[line cap=round, line width=4pt] (5,0) -- (5,0);\end{scope}}
-    \only<2>{\begin{scope}[morph=dot]\fill (5,0) -- (7,0) -- (6,2) -- cycle;\end{scope}}
-  \end{tikzpicture}
+	\begin{tikzpicture}
+		\useasboundingbox (-1,-1) rectangle (8,3);
+		\only<1>{\begin{scope}[move=line]\draw (0,0) -- (3,0);\end{scope}}
+		\only<2>{\begin{scope}[move=line]\draw (0,1) -- (3,1);\end{scope}}
+		\only<1>{\begin{scope}[morph=dot]\draw[line cap=round, line width=4pt] (5,0) -- (5,0);\end{scope}}
+		\only<2>{\begin{scope}[morph=dot]\fill (5,0) -- (7,0) -- (6,2) -- cycle;\end{scope}}
+	\end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Morph outside a kinetic picture}
-  \tikzset{every picture/.style={}}
-  \begin{tikzpicture}
-    \useasboundingbox (-1,-1) rectangle (8,3);
-    \begin{scope}[morph=box]\fill[blue] (0,0) rectangle (1,1);\end{scope}
-  \end{tikzpicture}
+	\tikzset{every picture/.style={}}
+	\begin{tikzpicture}
+		\useasboundingbox (-1,-1) rectangle (8,3);
+		\begin{scope}[morph=box]\fill[blue] (0,0) rectangle (1,1);\end{scope}
+	\end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Morph outside a kinetic picture, target}
-  \kntransition{zoom}
-  \tikzset{every picture/.style={}}
-  \begin{tikzpicture}
-    \useasboundingbox (-1,-1) rectangle (8,3);
-    \begin{scope}[morph=box]\fill[red] (2,0) rectangle (6,2);\end{scope}
-  \end{tikzpicture}
+	\kntransition{zoom}
+	\tikzset{every picture/.style={}}
+	\begin{tikzpicture}
+		\useasboundingbox (-1,-1) rectangle (8,3);
+		\begin{scope}[morph=box]\fill[red] (2,0) rectangle (6,2);\end{scope}
+	\end{tikzpicture}
 \end{frame}
 
 \begin{frame}{Unknown transition name}
-  \kntransition{constructor}
-  Done.
+	\kntransition{constructor}
+	Done.
 \end{frame}
 
 \end{document}
