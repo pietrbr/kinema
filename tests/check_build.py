@@ -1,4 +1,4 @@
-"""Build decks with PDF figures: with each converter, with none, and with each cropping option.
+"""Build decks with PDF figures: with each converter, with none, and with each rejected option.
 
 Usage: uv run --no-project python tests/check_build.py
 """
@@ -15,8 +15,7 @@ SCRIPT = ROOT / "scripts" / "kinetic" / "kinetic.lua"
 FIGURE = ROOT / "tests" / "fixtures" / "figure.pdf"
 TEX_TOOLS = ("texlua", "latex", "dvisvgm", "kpsewhich", "extractbb")
 CONVERTERS = ("pdftocairo", "pdf2svg")
-CROP_OPTIONS = {"trim=1cm 0 0 0": "trim option", "viewport=0 0 20 20": "viewport option",
-                "bb=0 0 20 20": "bb option", "pagebox=mediabox": "crop box"}
+REJECTED_OPTIONS = {"natwidth=20bp": "natheight option", "pagebox=mediabox": "crop box"}
 DECK = r"""\documentclass{{beamer}}
 \usepackage{{kinetic}}
 \begin{{document}}
@@ -63,7 +62,7 @@ def main() -> int:
         result = build(tmp, tool_path(tmp, TEX_TOOLS))
         if result.returncode == 0 or "cannot convert" not in result.stderr:
             problems.append(f"no converter: expected a conversion error\n{result.stderr}")
-        for options, message in CROP_OPTIONS.items():
+        for options, message in REJECTED_OPTIONS.items():
             result = build(tmp, os.environ["PATH"], options)
             if result.returncode == 0 or message not in result.stderr.replace("\n", ""):
                 problems.append(f"{options}: expected an error naming '{message}'\n{result.stderr}")

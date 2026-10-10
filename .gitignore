@@ -30,3 +30,4 @@ tests/fixtures/*.html
 __pycache__/
 tests/fixtures/*.pdf
 !tests/fixtures/figure.pdf
+!tests/fixtures/halves.pdf

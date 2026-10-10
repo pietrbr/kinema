@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{kinetic}[2026/10/09 v0.2 Browser animations between Beamer overlays]
+\ProvidesPackage{kinetic}[2026/10/10 v0.2.1 Browser animations between Beamer overlays]
 \RequirePackage{tikz}
 \makeatletter
 % Each key marks a TikZ scope; kinetic-viewer.js animates scopes that share a name on
@@ -35,9 +35,7 @@
 			of #1. Remove the pagebox option, or make a PDF whose crop box covers the
 			area you need}{}}
 	\def\kn@pdf#1{%
-		\ifx\Gin@viewport@code\Gin@trim\kn@nocrop{#1}{trim}\fi
-		\ifx\Gin@viewport@code\Gin@viewport\kn@nocrop{#1}{viewport}\fi
-		\ifGin@bbox\kn@nocrop{#1}{bb}\fi
+		\ifGin@bbox\kn@nocrop{#1}{bb, natwidth, or natheight}\fi
 		\ifx\Gin@pagebox\kn@cropbox\else\kn@nobox{#1}\fi
 		\edef\kn@page{\ifx\Gin@page\@empty 1\else\Gin@page\fi}%
 		\edef\kn@file{#1}%
@@ -49,16 +47,30 @@
 		\fi
 		\edef\kn@svg{\knoutdir kn-\csname kn@key@\kn@file:\kn@page\endcsname.svg}%
 		\IfFileExists{\kn@svg}{\kn@pdfassvg}{}}
+	\def\kn@minus#1#2#3{\dimen@#2pt\advance\dimen@-#3pt\edef#1{\strip@pt\dimen@}}
+	% The SVG covers the whole crop box (\Gin@ollx..\Gin@oury, saved by trim and
+	% viewport); \Ginclude@bitmap shows the region \Gin@llx..\Gin@ury of it, in
+	% coordinates that start at the lower-left corner of that box.
 	\def\kn@pdfassvg{%
-		\dimen@\Gin@urx pt\advance\dimen@-\Gin@llx pt%
-		\edef\Gin@svg@real@width@bp{\strip@pt\dimen@}%
-		\dimen@\Gin@ury pt\advance\dimen@-\Gin@lly pt%
-		\edef\Gin@svg@real@height@bp{\strip@pt\dimen@}%
-		\def\Gin@llx{0}\def\Gin@lly{0}%
-		\let\Gin@urx\Gin@svg@real@width@bp
-		\let\Gin@ury\Gin@svg@real@height@bp
+		\ifx\Gin@viewport@code\relax
+			\let\Gin@ollx\Gin@llx\let\Gin@olly\Gin@lly
+			\let\Gin@ourx\Gin@urx\let\Gin@oury\Gin@ury
+		\fi
+		\kn@minus\Gin@svg@real@width@bp\Gin@ourx\Gin@ollx
+		\kn@minus\Gin@svg@real@height@bp\Gin@oury\Gin@olly
+		\kn@minus\Gin@llx\Gin@llx\Gin@ollx
+		\kn@minus\Gin@urx\Gin@urx\Gin@ollx
+		\kn@minus\Gin@lly\Gin@lly\Gin@olly
+		\kn@minus\Gin@ury\Gin@ury\Gin@olly
 		\Ginclude@bitmap{\kn@svg}}
+	\def\kn@readpdf#1{%
+		\let\kn@bbox\Gread@BBox
+		\edef\Gread@BBox{\@percentchar\@percentchar HiResBoundingBox}%
+		\kn@origreadpdf{#1}%
+		\let\Gread@BBox\kn@bbox}
 	\def\kn@graphics{%
+		\ifx\Gread@pdf\kn@readpdf\else\let\kn@origreadpdf\Gread@pdf\fi
+		\let\Gread@pdf\kn@readpdf
 		\let\Ginclude@pdf\kn@pdf
 		\let\Ginclude@eps\kn@noeps
 		\def\Gin@extensions{.svg,.pdf,.eps,.png,.jpg,.jpeg}}

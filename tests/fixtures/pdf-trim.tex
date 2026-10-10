@@ -1,0 +1,18 @@
+% Crops halves.pdf (blue left half, red right half); tests/check_crop.py checks each page's colors.
+\documentclass{beamer}
+\usepackage{kinetic}
+\setbeamertemplate{navigation symbols}{}
+\begin{document}
+\begin{frame}{Trim from the right}
+	\centering
+	\includegraphics[trim=0 0 2cm 0, clip, width=6cm]{halves}
+\end{frame}
+\begin{frame}{Trim from the left}
+	\centering
+	\includegraphics[trim=2cm 0 0 0, clip, width=6cm]{halves}
+\end{frame}
+\begin{frame}{Viewport on the left half}
+	\centering
+	\includegraphics[viewport=0 0 2cm 1cm, clip, width=6cm]{halves}
+\end{frame}
+\end{document}

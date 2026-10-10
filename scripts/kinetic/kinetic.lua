@@ -134,10 +134,13 @@ local function run_latex(engine, stem, outdir)
   return log
 end
 
+local PDFTOCAIRO = "pdftocairo -svg -nocenter -noshrink -f %d -l %d %s %s"
+local PDF2SVG = "pdf2svg %s %s %d"
+
 local function pdf_to_svg(input, page, output)
   local converters = {
-    string.format("pdftocairo -svg -f %d -l %d %s %s", page, page, quote(input), quote(output)),
-    string.format("pdf2svg %s %s %d", quote(input), quote(output), page),
+    string.format(PDFTOCAIRO, page, page, quote(input), quote(output)),
+    string.format(PDF2SVG, quote(input), quote(output), page),
   }
   local errors = {}
   for _, cmd in ipairs(converters) do
@@ -155,6 +158,15 @@ end
 local function convert_pdfs(stem, srcdir, outdir)
   local converted = 0
   local wanted = {}
+  local stamp = outdir .. "/" .. SVG_PREFIX .. "converters.txt"
+  if read_optional(stamp) ~= PDFTOCAIRO .. "\n" .. PDF2SVG then
+    for file in lfs.dir(outdir) do
+      if file:sub(1, #SVG_PREFIX) == SVG_PREFIX and file:match("%.svg$") then
+        os.remove(outdir .. "/" .. file)
+      end
+    end
+    write(stamp, PDFTOCAIRO .. "\n" .. PDF2SVG)
+  end
   for line in read_optional(outdir .. "/" .. stem .. ".knpdf"):gmatch("[^\n]+") do
     local key, page, file = line:match("^(%x+) (%d+) (.+)$")
     if not key then

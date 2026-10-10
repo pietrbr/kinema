@@ -22,7 +22,7 @@
 \newcommand{\cmd}[1]{\texttt{#1}}
 
 \title{The \pkg{} package\\[0.3em]\large Browser animations between Beamer overlays}
-\date{Version 0.2, 2026/10/09}
+\date{Version 0.2.1, 2026/10/10}
 
 \begin{document}
 \maketitle
@@ -361,12 +361,12 @@ the HTML build handles figures in these ways:
 	\item EPS figures: the HTML build stops with an error. Convert them to PDF
 	      or SVG.
 \end{itemize}
-The HTML build stops with an error if a PDF figure uses the \cmd{trim},
-\cmd{viewport}, \cmd{bb}, \cmd{natwidth}, \cmd{natheight}, or \cmd{pagebox}
-option of \cmd{\textbackslash includegraphics}, because the converted SVG always
-shows the whole crop box of the page. Crop the PDF file itself instead, for
-example with \cmd{pdfcrop}. The \cmd{clip} option alone changes nothing and is
-accepted. If
+The \cmd{trim}, \cmd{viewport}, and \cmd{clip} options of
+\cmd{\textbackslash includegraphics} work for converted PDF figures as in the
+PDF. The HTML build stops with an error if a PDF figure uses the \cmd{bb},
+\cmd{natwidth}, \cmd{natheight}, or \cmd{pagebox} option, because the converted
+SVG always covers the crop box of the page. Crop the PDF file itself instead,
+for example with \cmd{pdfcrop}. If
 a figure exists as PDF and as EPS, the HTML build uses the PDF. If \cmd{dvisvgm} reports an error,
 \cmd{kinetic} prints it.
 
