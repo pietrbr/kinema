@@ -27,7 +27,18 @@
   \newwrite\kn@pdflist
   \def\kn@noeps#1{\PackageError{kinetic}{The HTML deck cannot show #1.
     Convert it to PDF or SVG}{}}
+  \def\kn@cropbox{cropbox}
+  \def\kn@nocrop#1#2{\PackageError{kinetic}{The HTML deck does not support the
+    #2 option of \string\includegraphics\space for #1. Crop the PDF file itself,
+    for example with pdfcrop, and remove the option}{}}
+  \def\kn@nobox#1{\PackageError{kinetic}{The HTML deck shows only the crop box
+    of #1. Remove the pagebox option, or make a PDF whose crop box covers the
+    area you need}{}}
   \def\kn@pdf#1{%
+    \ifx\Gin@viewport@code\Gin@trim\kn@nocrop{#1}{trim}\fi
+    \ifx\Gin@viewport@code\Gin@viewport\kn@nocrop{#1}{viewport}\fi
+    \ifGin@bbox\kn@nocrop{#1}{bb}\fi
+    \ifx\Gin@pagebox\kn@cropbox\else\kn@nobox{#1}\fi
     \edef\kn@page{\ifx\Gin@page\@empty 1\else\Gin@page\fi}%
     \edef\kn@file{#1}%
     \ifcsname kn@key@\kn@file:\kn@page\endcsname\else
@@ -37,7 +48,6 @@
         \space\kn@page\space\detokenize\expandafter{\kn@file}}%
     \fi
     \edef\kn@svg{\knoutdir kn-\csname kn@key@\kn@file:\kn@page\endcsname.svg}%
-    \ifGin@clip\PackageWarning{kinetic}{The HTML deck ignores clip for #1}\fi
     \IfFileExists{\kn@svg}{\kn@pdfassvg}{}}
   \def\kn@pdfassvg{%
     \dimen@\Gin@urx pt\advance\dimen@-\Gin@llx pt%

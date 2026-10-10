@@ -361,9 +361,12 @@ the HTML build handles figures in these ways:
 	\item EPS figures: the HTML build stops with an error. Convert them to PDF
 	      or SVG.
 \end{itemize}
-The \cmd{trim}, \cmd{viewport}, \cmd{clip}, and \cmd{pagebox} options of
-\cmd{\textbackslash includegraphics} are not supported for converted PDF figures:
-the SVG always shows the whole page. For \cmd{clip}, \pkg{} prints a warning. If
+The HTML build stops with an error if a PDF figure uses the \cmd{trim},
+\cmd{viewport}, \cmd{bb}, \cmd{natwidth}, \cmd{natheight}, or \cmd{pagebox}
+option of \cmd{\textbackslash includegraphics}, because the converted SVG always
+shows the whole crop box of the page. Crop the PDF file itself instead, for
+example with \cmd{pdfcrop}. The \cmd{clip} option alone changes nothing and is
+accepted. If
 a figure exists as PDF and as EPS, the HTML build uses the PDF. If \cmd{dvisvgm} reports an error,
 \cmd{kinetic} prints it.
 
