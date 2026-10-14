@@ -14,8 +14,12 @@ local USAGE = "usage: kinema [--engine=latex|dvilualatex] <file.tex> | --present
 local HTML_SETUP = [[\def\pgfsysdriver{pgfsys-dvisvgm.def}]]
   .. [[\PassOptionsToPackage{dvisvgm}{graphicx}\PassOptionsToPackage{dvisvgm}{xcolor}]]
 
-local function fail(msg)
+local function log(msg)
   io.stderr:write("kinema: " .. msg .. "\n")
+end
+
+local function fail(msg)
+  log(msg)
   os.exit(1)
 end
 
@@ -178,6 +182,7 @@ local function convert_pdfs(stem, srcdir, outdir)
     if exists(outdir .. "/" .. name) then
       goto continue
     end
+    log("converting " .. file .. " (page " .. page .. ") to SVG")
     local errors = pdf_to_svg(find_image(file, srcdir), tonumber(page), outdir .. "/" .. name)
     if errors then
       fail("cannot convert " .. file .. " (page " .. page .. ") to SVG. Install Poppler (pdftocairo) "
@@ -198,28 +203,38 @@ end
 local function run_latex_until_settled(engine, stem, srcdir, outdir)
   local aux = outdir .. "/" .. stem .. ".aux"
   local before = read_optional(aux)
-  for _ = 1, MAX_LATEX_RUNS do
-    local log = run_latex(engine, stem, outdir)
+  for run = 1, MAX_LATEX_RUNS do
+    log(engine .. " run " .. run)
+    local latex_log = run_latex(engine, stem, outdir)
     local converted = convert_pdfs(stem, srcdir, outdir)
     local after = read_optional(aux)
-    if converted == 0 and after == before and not log:find("Rerun to", 1, true) then
+    if converted == 0 and after == before and not latex_log:find("Rerun to", 1, true) then
       return
     end
     before = after
   end
-  io.stderr:write("kinema: references still changed after " .. MAX_LATEX_RUNS .. " LaTeX runs\n")
+  log("references still changed after " .. MAX_LATEX_RUNS .. " LaTeX runs")
 end
 
 local function run_dvisvgm(stem, outdir)
+  log("converting the DVI pages to SVG")
   local ok, output = capture(string.format("dvisvgm --page=1- --no-fonts -o %s %s",
     quote(outdir .. "/" .. stem .. "-%p.svg"), quote(outdir .. "/" .. stem .. ".dvi")))
-  if not ok then
-    fail("dvisvgm failed:\n" .. output)
-  end
+  local page, page_lines = "?", {}
   for line in output:gmatch("[^\n]+") do
-    if line:find("ERROR", 1, true) then
-      io.stderr:write("kinema: dvisvgm: " .. line .. "\n")
+    local n = line:match("^processing page (%d+)")
+    if n then
+      page, page_lines = n, {}
+    elseif not line:match("^%s+graphic size:") and not line:match("^%s+output written to")
+        and not line:find("PostScript specials ignored", 1, true) then
+      page_lines[#page_lines + 1] = line
     end
+    if line:find("ERROR", 1, true) then
+      log("dvisvgm: page " .. page .. ": " .. line)
+    end
+  end
+  if not ok then
+    fail("dvisvgm failed on page " .. page .. ":\n" .. table.concat(page_lines, "\n"))
   end
 end
 
