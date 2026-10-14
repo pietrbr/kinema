@@ -1,5 +1,5 @@
-// Opens a kinetic deck in a borderless macOS window with the slide aspect ratio.
-// Usage: osascript -l JavaScript kinetic-present.js <deck.html>
+// Opens a kinema deck in a borderless macOS window with the slide aspect ratio.
+// Usage: osascript -l JavaScript kinema-present.js <deck.html>
 ObjC.import("Cocoa");
 ObjC.import("WebKit");
 
@@ -7,7 +7,7 @@ const SCREEN_FRACTION = 0.8;
 const DRAG_INTERVAL_S = 1 / 60;
 
 ObjC.registerSubclass({
-  name: "KineticWindow",
+  name: "KinemaWindow",
   superclass: "NSWindow",
   methods: {
     canBecomeKeyWindow: { types: ["bool", []], implementation: () => true },
@@ -36,7 +36,7 @@ function followMouse() {
 }
 
 ObjC.registerSubclass({
-  name: "KineticDrag",
+  name: "KinemaDrag",
   superclass: "NSObject",
   methods: {
     "userContentController:didReceiveScriptMessage:": {
@@ -57,10 +57,10 @@ function slideSize(path) {
   }
   const m = html.match(/viewBox=["'][-\d.]+ [-\d.]+ ([\d.]+) ([\d.]+)["']/);
   if (!m) {
-    throw new Error("no slide in " + path + "; build it with kinetic first");
+    throw new Error("no slide in " + path + "; build it with kinema first");
   }
   if (!html.includes('id="marks"')) {
-    throw new Error(path + " was built by an older kinetic; build it again");
+    throw new Error(path + " was built by an older kinema; build it again");
   }
   return { width: Number(m[1]), height: Number(m[2]) };
 }
@@ -95,7 +95,7 @@ function appMenu() {
 
 function run(argv) {
   if (argv.length !== 1) {
-    throw new Error("usage: kinetic --present <deck.html>");
+    throw new Error("usage: kinema --present <deck.html>");
   }
   const path = $(argv[0]).stringByStandardizingPath.js;
   const slide = slideSize(path);
@@ -104,7 +104,7 @@ function run(argv) {
   app.setActivationPolicy($.NSApplicationActivationPolicyRegular);
   app.mainMenu = appMenu();
 
-  const win = $.KineticWindow.alloc.initWithContentRectStyleMaskBackingDefer(
+  const win = $.KinemaWindow.alloc.initWithContentRectStyleMaskBackingDefer(
     frame,
     $.NSWindowStyleMaskBorderless | $.NSWindowStyleMaskResizable,
     $.NSBackingStoreBuffered,
@@ -116,8 +116,8 @@ function run(argv) {
   presentWindow = win;
   const config = $.WKWebViewConfiguration.alloc.init;
   config.userContentController.addScriptMessageHandlerName(
-    $.KineticDrag.alloc.init,
-    "kinetic",
+    $.KinemaDrag.alloc.init,
+    "kinema",
   );
   const web = $.WKWebView.alloc.initWithFrameConfiguration($.NSZeroRect, config);
   web.autoresizingMask = $.NSViewWidthSizable | $.NSViewHeightSizable;

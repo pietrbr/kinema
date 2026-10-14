@@ -9,7 +9,7 @@
   const DURATION = { morph: 700, staged: 1300, zoom: 1000, enter: 550 };
   const TRANSITION_DURATION = { fade: 450, push: 550 };
   const DIRECTION = { forward: 1, backward: -1 };
-  const nativeWindow = window.webkit?.messageHandlers?.kinetic;
+  const nativeWindow = window.webkit?.messageHandlers?.kinema;
   const MODE = { normal: "normal", pen: "pen", laser: "laser" };
   const PEN_WIDTH = 0.004;
   const LASER_RADIUS = 0.007;
@@ -830,7 +830,7 @@
       Math.min(pages.length - 1, (Number.isNaN(start) ? 1 : start) - 1),
     ),
   );
-  window.kinetic = {
+  window.kinema = {
     go,
     get page() {
       return current + 1;

@@ -1,10 +1,10 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{kinetic}[2026/10/14 v0.3.0 Browser animations between Beamer overlays]
+\ProvidesPackage{kinema}[2026/10/14 v0.4.0 Browser animations between Beamer overlays]
 \RequirePackage{tikz}
 \makeatletter
-% Each key marks a TikZ scope; kinetic-viewer.js animates scopes that share a name on
+% Each key marks a TikZ scope; kinema-viewer.js animates scopes that share a name on
 % consecutive pages. The keys emit SVG only under the dvisvgm driver, which the
-% kinetic build selects; every other driver ignores them. Under that driver, TikZ
+% kinema build selects; every other driver ignores them. Under that driver, TikZ
 % externalization is off, \includestandalone reads the figure source, and each PDF
 % figure is listed in \jobname.knpdf and replaced by the SVG that the build makes
 % from it in \knoutdir, because dvisvgm cannot read PDF files on its own.
@@ -25,13 +25,13 @@
 	\RequirePackage{pdftexcmds}
 	\providecommand{\knoutdir}{}
 	\newwrite\kn@pdflist
-	\def\kn@noeps#1{\PackageError{kinetic}{The HTML deck cannot show #1.
+	\def\kn@noeps#1{\PackageError{kinema}{The HTML deck cannot show #1.
 			Convert it to PDF or SVG}{}}
 	\def\kn@cropbox{cropbox}
-	\def\kn@nocrop#1#2{\PackageError{kinetic}{The HTML deck does not support the
+	\def\kn@nocrop#1#2{\PackageError{kinema}{The HTML deck does not support the
 			#2 option of \string\includegraphics\space for #1. Crop the PDF file itself,
 			for example with pdfcrop, and remove the option}{}}
-	\def\kn@nobox#1{\PackageError{kinetic}{The HTML deck shows only the crop box
+	\def\kn@nobox#1{\PackageError{kinema}{The HTML deck shows only the crop box
 			of #1. Remove the pagebox option, or make a PDF whose crop box covers the
 			area you need}{}}
 	\def\kn@pdf#1{%

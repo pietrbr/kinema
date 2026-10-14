@@ -1,3 +1,0 @@
-# Find kinetic.sty in the repository.
-$pdf_mode = 1;
-ensure_path('TEXINPUTS', '../../../tex/latex/kinetic//');

@@ -35,7 +35,7 @@ def count_colors(png: bytes) -> dict[str, int]:
 
 
 def build(path: str) -> str | None:
-    shutil.rmtree(DECK.with_suffix(".kinetic"), ignore_errors=True)
+    shutil.rmtree(DECK.with_suffix(".kinema"), ignore_errors=True)
     result = subprocess.run(["texlua", str(SCRIPT), str(DECK)], capture_output=True, text=True,
                             env={**os.environ, "PATH": path})
     return None if result.returncode == 0 else result.stderr
@@ -78,7 +78,7 @@ def main() -> int:
                 checked += 1
                 failed |= bool(problems)
                 print(f"{converter:10s} {browser_name:9s} {problems or 'ok'}")
-    shutil.rmtree(DECK.with_suffix(".kinetic"), ignore_errors=True)
+    shutil.rmtree(DECK.with_suffix(".kinema"), ignore_errors=True)
     if checked == 0:
         print("no browser ran")
         return 1

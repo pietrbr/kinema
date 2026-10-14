@@ -12,7 +12,7 @@ BRAVE = Path("/Applications/Brave Browser.app/Contents/MacOS/Brave Browser")
 VIEWPORT = {"width": 1280, "height": 720}
 MID = 0.5
 STEP_TIMEOUT_MS = 5000
-NATIVE_WINDOW = "window.webkit = { messageHandlers: { kinetic: { postMessage() {} } } };"
+NATIVE_WINDOW = "window.webkit = { messageHandlers: { kinema: { postMessage() {} } } };"
 HIDDEN_IN_OVERLAY = (
     "[...document.querySelectorAll('#overlay *')]"
     ".filter((e) => getComputedStyle(e).visibility === 'hidden').length"
@@ -34,8 +34,8 @@ def walk(page, url: str, count: int) -> list[int]:
     for key in ("ArrowRight", "ArrowLeft"):
         for _ in range(count - 1):
             page.keyboard.press(key)
-            page.wait_for_function("!window.kinetic.busy", timeout=STEP_TIMEOUT_MS)
-        ends.append(page.evaluate("window.kinetic.page"))
+            page.wait_for_function("!window.kinema.busy", timeout=STEP_TIMEOUT_MS)
+        ends.append(page.evaluate("window.kinema.page"))
     return ends
 
 
@@ -43,21 +43,21 @@ def check_marks(page, url: str) -> list[str]:
     errors = []
     page.add_init_script(NATIVE_WINDOW)
     page.goto(url)
-    if page.evaluate("window.kinetic.mode") != "laser":
+    if page.evaluate("window.kinema.mode") != "laser":
         errors.append("the present window did not start the laser")
     page.keyboard.press("p")
-    start = page.evaluate("window.kinetic.page")
+    start = page.evaluate("window.kinema.page")
     page.mouse.move(400, 300)
     page.mouse.down()
     page.mouse.move(500, 350)
     page.mouse.up()
-    if page.evaluate("window.kinetic.page") != start:
+    if page.evaluate("window.kinema.page") != start:
         errors.append("a pen stroke changed the page")
-    if page.evaluate("window.kinetic.marks") != 1:
+    if page.evaluate("window.kinema.marks") != 1:
         errors.append("a pen stroke left no mark")
     page.keyboard.press("ArrowRight")
-    page.wait_for_function("!window.kinetic.busy", timeout=STEP_TIMEOUT_MS)
-    if page.evaluate("window.kinetic.marks") != 0:
+    page.wait_for_function("!window.kinema.busy", timeout=STEP_TIMEOUT_MS)
+    if page.evaluate("window.kinema.marks") != 0:
         errors.append("a page change kept the pen marks")
     return errors
 

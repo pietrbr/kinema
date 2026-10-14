@@ -11,13 +11,13 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SCRIPT = ROOT / "scripts" / "kinetic" / "kinetic.lua"
+SCRIPT = ROOT / "scripts" / "kinema" / "kinema.lua"
 FIGURE = ROOT / "tests" / "fixtures" / "figure.pdf"
 TEX_TOOLS = ("texlua", "latex", "dvisvgm", "kpsewhich", "extractbb")
 CONVERTERS = ("pdftocairo", "pdf2svg")
 REJECTED_OPTIONS = {"natwidth=20bp": "natheight option", "pagebox=mediabox": "crop box"}
 DECK = r"""\documentclass{{beamer}}
-\usepackage{{kinetic}}
+\usepackage{{kinema}}
 \begin{{document}}
 \begin{{frame}}{{PDF figure}}\includegraphics[{options}]{{figure}}\end{{frame}}
 \end{{document}}
@@ -40,7 +40,7 @@ def tool_path(tmp: Path, tools: tuple[str, ...]) -> str:
 def build(tmp: Path, path: str, options: str = "width=3cm") -> subprocess.CompletedProcess:
     deck = tmp / "deck.tex"
     deck.write_text(DECK.format(options=options))
-    shutil.rmtree(tmp / "deck.kinetic", ignore_errors=True)
+    shutil.rmtree(tmp / "deck.kinema", ignore_errors=True)
     cmd = ["texlua", str(SCRIPT), str(deck)]
     return subprocess.run(cmd, capture_output=True, text=True, env={**os.environ, "PATH": path})
 

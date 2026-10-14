@@ -1,6 +1,6 @@
 % Decks with degenerate shapes and missing picture wrappers; tests/check_browsers.py must pass on the build.
 \documentclass{beamer}
-\usepackage{kinetic}
+\usepackage{kinema}
 \setbeamertemplate{navigation symbols}{}
 
 \begin{document}
@@ -15,7 +15,7 @@
 	\end{tikzpicture}
 \end{frame}
 
-\begin{frame}{Morph outside a kinetic picture}
+\begin{frame}{Morph outside a kinema picture}
 	\tikzset{every picture/.style={}}
 	\begin{tikzpicture}
 		\useasboundingbox (-1,-1) rectangle (8,3);
@@ -23,7 +23,7 @@
 	\end{tikzpicture}
 \end{frame}
 
-\begin{frame}{Morph outside a kinetic picture, target}
+\begin{frame}{Morph outside a kinema picture, target}
 	\kntransition{zoom}
 	\tikzset{every picture/.style={}}
 	\begin{tikzpicture}

@@ -5,7 +5,7 @@
 \usepackage{booktabs}
 \usepackage{listings}
 \usepackage{xcolor}
-\usepackage{kinetic}
+\usepackage{kinema}
 \usepackage[hidelinks]{hyperref}
 
 \lstset{
@@ -18,11 +18,11 @@
   xrightmargin=1em,
 }
 \emergencystretch=3em
-\newcommand{\pkg}{\textsf{kinetic}}
+\newcommand{\pkg}{\textsf{kinema}}
 \newcommand{\cmd}[1]{\texttt{#1}}
 
 \title{The \pkg{} package\\[0.3em]\large Browser animations between Beamer overlays}
-\date{Version 0.3.0, 2026/10/14}
+\date{Version 0.4.0, 2026/10/14}
 
 \begin{document}
 \maketitle
@@ -33,7 +33,7 @@
 \pkg{} adds motion to Beamer slides. You give a name to a TikZ scope in your
 \cmd{.tex} file. The PDF build ignores the names and gives the usual overlays.
 An overlay is one step of a Beamer frame, and each overlay becomes one page. The
-\cmd{kinetic} command builds one HTML file, and the browser animates the named
+\cmd{kinema} command builds one HTML file, and the browser animates the named
 shapes from one page to the next.
 
 You keep one source file with two outputs. The PDF works for print, for handouts,
@@ -53,7 +53,7 @@ The HTML build has three steps:
 	      named scope becomes an SVG group with a \cmd{data-kn-*} attribute.
 	\item \cmd{dvisvgm} converts each DVI page into one SVG file. It draws the text
 	      as shapes, so the text looks identical to the PDF.
-	\item The \cmd{kinetic} script puts all SVG pages, all images, and the viewer
+	\item The \cmd{kinema} script puts all SVG pages, all images, and the viewer
 	      into one HTML file. In the browser, the viewer finds groups with the same name
 	      on two consecutive pages and animates between them.
 \end{enumerate}
@@ -83,21 +83,21 @@ Run the install script from the repository:
 \end{lstlisting}
 The script makes three symbolic links:
 \begin{itemize}
-	\item \cmd{tex/latex/kinetic} into \cmd{TEXMFHOME/tex/latex}, for the package.
-	\item \cmd{scripts/kinetic} into \cmd{TEXMFHOME/scripts}, for the build script.
-	\item \cmd{scripts/kinetic/kinetic.lua} as \cmd{\textasciitilde/.local/bin/kinetic},
+	\item \cmd{tex/latex/kinema} into \cmd{TEXMFHOME/tex/latex}, for the package.
+	\item \cmd{scripts/kinema} into \cmd{TEXMFHOME/scripts}, for the build script.
+	\item \cmd{scripts/kinema/kinema.lua} as \cmd{\textasciitilde/.local/bin/kinema},
 	      for the command.
 \end{itemize}
-To put the command in a different directory, set \cmd{KINETIC\_BINDIR} before you
+To put the command in a different directory, set \cmd{KINEMA\_BINDIR} before you
 run the script. If that directory is not on your \cmd{PATH}, the script tells you.
 To remove the three links, run \cmd{./install.sh --uninstall}. The script removes
 each path only if it is a symbolic link.
 
 The repository follows the TeX Directory Structure. To install by hand, copy the
 \cmd{tex} and \cmd{scripts} directories into a TeX tree, and make
-\cmd{kinetic.lua} executable.
+\cmd{kinema.lua} executable.
 
-On Overleaf, upload \cmd{kinetic.sty} into the project. Overleaf then builds the
+On Overleaf, upload \cmd{kinema.sty} into the project. Overleaf then builds the
 PDF. The HTML build runs only on your computer.
 
 \section{Writing a deck}
@@ -107,9 +107,9 @@ PDF. The HTML build runs only on your computer.
 Load the package after the document class. The package loads TikZ.
 \begin{lstlisting}
 \documentclass{beamer}
-\usepackage{kinetic}
+\usepackage{kinema}
 \end{lstlisting}
-The deck needs no other change for the HTML build. The \cmd{kinetic} command
+The deck needs no other change for the HTML build. The \cmd{kinema} command
 selects the SVG driver and passes the \cmd{dvisvgm} option to \cmd{graphicx} and
 \cmd{xcolor} on the command line.
 
@@ -308,12 +308,12 @@ parameter multiplies all of them.
 
 \subsection{The HTML deck}
 
-Run \cmd{kinetic} with the source file:
+Run \cmd{kinema} with the source file:
 \begin{lstlisting}
-kinetic talk.tex
+kinema talk.tex
 \end{lstlisting}
 The command writes \cmd{talk.html} next to \cmd{talk.tex}. It keeps the
-intermediate files in the directory \cmd{talk.kinetic/}, so they do not mix with
+intermediate files in the directory \cmd{talk.kinema/}, so they do not mix with
 the files of the PDF build. It runs \cmd{latex} again while the \cmd{.aux} file
 changes or the log asks for a rerun, with at most three runs in total. If the
 references still change after three runs, it prints a warning. It then runs
@@ -321,17 +321,17 @@ references still change after three runs, it prints a warning. It then runs
 
 If your deck needs LuaLaTeX, use the \cmd{dvilualatex} engine:
 \begin{lstlisting}
-kinetic --engine=dvilualatex talk.tex
+kinema --engine=dvilualatex talk.tex
 \end{lstlisting}
 The SVG conversion reads DVI, so plain \cmd{lualatex} does not work for the HTML
-build. \cmd{kinetic} accepts only \cmd{latex} and \cmd{dvilualatex}.
+build. \cmd{kinema} accepts only \cmd{latex} and \cmd{dvilualatex}.
 
 The HTML build does not run BibTeX or Biber. If the PDF build wrote
-\cmd{talk.bbl} next to \cmd{talk.tex}, \cmd{kinetic} copies it, and the
+\cmd{talk.bbl} next to \cmd{talk.tex}, \cmd{kinema} copies it, and the
 citations show in the HTML deck. Build the PDF first if the deck has citations. Decks that load OpenType fonts through \cmd{fontspec} were not tested.
 
-If \cmd{latex} fails, \cmd{kinetic} prints the first error from the log and stops.
-The full log is \cmd{talk.kinetic/talk.log}.
+If \cmd{latex} fails, \cmd{kinema} prints the first error from the log and stops.
+The full log is \cmd{talk.kinema/talk.log}.
 
 \subsection{Images and figures}
 
@@ -341,8 +341,8 @@ search path. \cmd{dvisvgm} cannot read PDF files without tools outside TeX, so
 the HTML build handles figures in these ways:
 \begin{itemize}
 	\item PDF figures included with \cmd{\textbackslash includegraphics}: the
-	      package lists each PDF and page in \cmd{talk.kinetic/talk.knpdf}.
-	      \cmd{kinetic} converts each one to SVG with \cmd{pdftocairo} from Poppler,
+	      package lists each PDF and page in \cmd{talk.kinema/talk.knpdf}.
+	      \cmd{kinema} converts each one to SVG with \cmd{pdftocairo} from Poppler,
 	      or with \cmd{pdf2svg} if \cmd{pdftocairo} fails, and runs LaTeX once more
 	      to put the SVG files in place. The name of each SVG file contains a hash of
 	      the PDF content, so a changed PDF gets a new SVG. A conversion takes about
@@ -368,7 +368,7 @@ PDF. The HTML build stops with an error if a PDF figure uses the \cmd{bb},
 SVG always covers the crop box of the page. Crop the PDF file itself instead,
 for example with \cmd{pdfcrop}. If
 a figure exists as PDF and as EPS, the HTML build uses the PDF. If \cmd{dvisvgm} reports an error,
-\cmd{kinetic} prints it.
+\cmd{kinema} prints it.
 
 \subsection{The PDF}
 
@@ -377,10 +377,10 @@ The keys do nothing in the PDF, and each overlay becomes one page.
 
 \subsection{Both outputs with latexmk}
 
-latexmk can run \cmd{kinetic} after each successful PDF build. Add this line to
+latexmk can run \cmd{kinema} after each successful PDF build. Add this line to
 your \cmd{latexmkrc}:
 \begin{lstlisting}
-$success_cmd = 'kinetic %S';
+$success_cmd = 'kinema %S';
 \end{lstlisting}
 latexmk runs \cmd{\$success\_cmd} only in watch mode, \cmd{latexmk -pvc}. vimtex
 uses watch mode, so the HTML deck follows each save. Each save then compiles the
@@ -409,10 +409,10 @@ rest of the window.
 
 \subsection{The present window}
 
-On macOS, \cmd{kinetic --present} opens a deck that you built before in a window
+On macOS, \cmd{kinema --present} opens a deck that you built before in a window
 with the slide aspect ratio and no title bar:
 \begin{lstlisting}
-kinetic --present talk.html
+kinema --present talk.html
 \end{lstlisting}
 The window contains only the slide. If you share this window in a video call, for
 example in Microsoft Teams, the stream has no black bars and no browser controls.
@@ -471,12 +471,12 @@ no network connection.
 
 The repository contains these files:
 \begin{description}
-	\item[\cmd{tex/latex/kinetic/kinetic.sty}] the LaTeX package.
-	\item[\cmd{scripts/kinetic/kinetic.lua}] the \cmd{kinetic} command.
-	\item[\cmd{scripts/kinetic/kinetic-viewer.js}] the viewer that runs in the browser.
-	\item[\cmd{scripts/kinetic/kinetic-template.html}] the page that holds the deck.
-	\item[\cmd{scripts/kinetic/kinetic-present.js}] the macOS present window.
-	\item[\cmd{doc/latex/kinetic/}] this manual.
+	\item[\cmd{tex/latex/kinema/kinema.sty}] the LaTeX package.
+	\item[\cmd{scripts/kinema/kinema.lua}] the \cmd{kinema} command.
+	\item[\cmd{scripts/kinema/kinema-viewer.js}] the viewer that runs in the browser.
+	\item[\cmd{scripts/kinema/kinema-template.html}] the page that holds the deck.
+	\item[\cmd{scripts/kinema/kinema-present.js}] the macOS present window.
+	\item[\cmd{doc/latex/kinema/}] this manual.
 	\item[\cmd{examples/}] the example deck, its outputs, and its \cmd{latexmkrc}.
 	\item[\cmd{tests/check\_browsers.py}] the browser test.
 	\item[\cmd{tests/check\_morph.py}, \cmd{tests/check\_build.py}] the morph test and the build test for PDF figures.
@@ -486,12 +486,12 @@ The repository contains these files:
 \subsection{Building from the repository}
 
 To build the example deck without installing \pkg{}, run the script with
-\cmd{texlua} from the repository. The script finds \cmd{kinetic.sty} in the
+\cmd{texlua} from the repository. The script finds \cmd{kinema.sty} in the
 repository by itself.
 \begin{lstlisting}
-texlua scripts/kinetic/kinetic.lua examples/showcase.tex
+texlua scripts/kinema/kinema.lua examples/showcase.tex
 \end{lstlisting}
-To build this manual, run \cmd{latexmk} in \cmd{doc/latex/kinetic}. Its
+To build this manual, run \cmd{latexmk} in \cmd{doc/latex/kinema}. Its
 \cmd{latexmkrc} adds the package directory to the TeX search path.
 
 \subsection{Browser test}

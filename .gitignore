@@ -14,8 +14,8 @@ plans/
 *.fdb_latexmk
 *.synctex.gz
 
-# kinetic build output
-*.kinetic/
+# kinema build output
+*.kinema/
 
 # Browser test screenshots
 shots/

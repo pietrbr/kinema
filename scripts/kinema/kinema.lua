@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
--- kinetic: build a self-contained HTML deck from a Beamer source.
--- Usage: kinetic [--engine=latex|dvilualatex] <file.tex> | --present <file.html>
+-- kinema: build a self-contained HTML deck from a Beamer source.
+-- Usage: kinema [--engine=latex|dvilualatex] <file.tex> | --present <file.html>
 
 local lfs = require("lfs")
 local mime = require("mime")
@@ -10,12 +10,12 @@ local MAX_LATEX_RUNS = 4
 local SVG_PREFIX = "kn-"
 local ERROR_LINES = 12
 local ENGINES = { latex = true, dvilualatex = true }
-local USAGE = "usage: kinetic [--engine=latex|dvilualatex] <file.tex> | --present <file.html>"
+local USAGE = "usage: kinema [--engine=latex|dvilualatex] <file.tex> | --present <file.html>"
 local HTML_SETUP = [[\def\pgfsysdriver{pgfsys-dvisvgm.def}]]
   .. [[\PassOptionsToPackage{dvisvgm}{graphicx}\PassOptionsToPackage{dvisvgm}{xcolor}]]
 
 local function fail(msg)
-  io.stderr:write("kinetic: " .. msg .. "\n")
+  io.stderr:write("kinema: " .. msg .. "\n")
   os.exit(1)
 end
 
@@ -110,7 +110,7 @@ end
 local function run_latex(engine, stem, outdir)
   local cmd = string.format("%s -interaction=nonstopmode -output-directory=%s -jobname=%s %s",
     engine, quote(outdir), quote(stem),
-    quote(HTML_SETUP .. "\\def\\knoutdir{" .. stem .. ".kinetic/}\\input{" .. stem .. ".tex}"))
+    quote(HTML_SETUP .. "\\def\\knoutdir{" .. stem .. ".kinema/}\\input{" .. stem .. ".tex}"))
   local log_path = outdir .. "/" .. stem .. ".log"
   os.remove(log_path)
   local ok, output = capture(cmd)
@@ -207,7 +207,7 @@ local function run_latex_until_settled(engine, stem, srcdir, outdir)
     end
     before = after
   end
-  io.stderr:write("kinetic: references still changed after " .. MAX_LATEX_RUNS .. " LaTeX runs\n")
+  io.stderr:write("kinema: references still changed after " .. MAX_LATEX_RUNS .. " LaTeX runs\n")
 end
 
 local function run_dvisvgm(stem, outdir)
@@ -218,7 +218,7 @@ local function run_dvisvgm(stem, outdir)
   end
   for line in output:gmatch("[^\n]+") do
     if line:find("ERROR", 1, true) then
-      io.stderr:write("kinetic: dvisvgm: " .. line .. "\n")
+      io.stderr:write("kinema: dvisvgm: " .. line .. "\n")
     end
   end
 end
@@ -259,7 +259,7 @@ local function present(html)
     fail("--present needs macOS; elsewhere, open the deck in Chrome and share its tab")
   end
   local ok = os.execute(string.format("osascript -l JavaScript %s %s",
-    quote(script_file("kinetic-present.js")), quote(html)))
+    quote(script_file("kinema-present.js")), quote(html)))
   os.exit(ok and 0 or 1)
 end
 
@@ -290,10 +290,10 @@ local function main()
   local srcdir = physical_dir(tex)
   lfs.chdir(srcdir)
   local stem = tex:match("([^/]+)%.tex$") or fail("expected a .tex file")
-  local outdir = srcdir .. "/" .. stem .. ".kinetic"
+  local outdir = srcdir .. "/" .. stem .. ".kinema"
   lfs.mkdir(outdir)
-  local sty = SCRIPT_DIR .. "/../../tex/latex/kinetic"
-  if exists(sty .. "/kinetic.sty") then
+  local sty = SCRIPT_DIR .. "/../../tex/latex/kinema"
+  if exists(sty .. "/kinema.sty") then
     os.setenv("TEXINPUTS", sty .. "//:" .. (os.getenv("TEXINPUTS") or ""))
   end
 
@@ -317,8 +317,8 @@ local function main()
   for name, uri in pairs(images) do
     entries[#entries + 1] = json_string(name) .. ":" .. json_string(uri)
   end
-  local html = read(script_file("kinetic-template.html"))
-  html = replace(html, "/*VIEWER*/", read(script_file("kinetic-viewer.js")))
+  local html = read(script_file("kinema-template.html"))
+  html = replace(html, "/*VIEWER*/", read(script_file("kinema-viewer.js")))
   html = replace(html, "<!--PAGES-->", table.concat(markup, "\n"))
   html = replace(html, "/*IMAGES*/", "{" .. table.concat(entries, ",") .. "}")
   local out = srcdir .. "/" .. stem .. ".html"
