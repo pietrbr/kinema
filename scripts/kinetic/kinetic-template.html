@@ -4,6 +4,9 @@
     <meta charset="utf-8" />
     <title>kinetic</title>
     <style>
+      :root {
+        --kn-ink: #ff2020;
+      }
       html,
       body {
         margin: 0;
@@ -26,15 +29,46 @@
         display: block;
       }
       .page > svg,
-      #overlay {
+      #overlay,
+      #marks {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
       }
-      #overlay {
+      #overlay,
+      #marks {
         pointer-events: none;
         z-index: 10;
+      }
+      #marks {
+        overflow: visible;
+      }
+      #marks g,
+      #marks path {
+        fill: none;
+        stroke: var(--kn-ink);
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      #marks > path {
+        stroke-opacity: 0.45;
+      }
+      #marks circle {
+        fill: var(--kn-ink);
+      }
+      body[data-mode="laser"],
+      body[data-mode="laser"] * {
+        cursor: none;
+      }
+      body[data-mode="pen"],
+      body[data-mode="pen"] * {
+        cursor: crosshair;
+        touch-action: none;
+      }
+      body[data-fullscreen="false"] .kn-fullscreen,
+      body[data-native="false"] .kn-native {
+        display: none;
       }
       #help {
         position: fixed;
@@ -68,6 +102,7 @@
     <div id="deck">
       <!--PAGES-->
       <svg id="overlay"></svg>
+      <svg id="marks"></svg>
     </div>
     <div id="help">
       <table>
@@ -79,7 +114,7 @@
           <td><kbd>&larr;</kbd> <kbd>Page Up</kbd></td>
           <td>previous page</td>
         </tr>
-        <tr>
+        <tr class="kn-fullscreen">
           <td><kbd>f</kbd></td>
           <td>full screen on and off</td>
         </tr>
@@ -88,8 +123,24 @@
           <td>this help on and off</td>
         </tr>
         <tr>
+          <td><kbd>l</kbd></td>
+          <td>laser pointer on and off</td>
+        </tr>
+        <tr>
+          <td><kbd>p</kbd></td>
+          <td>pen on and off</td>
+        </tr>
+        <tr>
+          <td><kbd>c</kbd></td>
+          <td>clear the pen marks</td>
+        </tr>
+        <tr>
           <td><kbd>Esc</kbd></td>
-          <td>close this help</td>
+          <td>close this help, or stop the pen or laser</td>
+        </tr>
+        <tr class="kn-native">
+          <td><kbd>Cmd</kbd>+<kbd>Q</kbd> <kbd>Cmd</kbd>+<kbd>W</kbd></td>
+          <td>close the window</td>
         </tr>
       </table>
     </div>

@@ -1,6 +1,6 @@
 #!/usr/bin/env texlua
 -- kinetic: build a self-contained HTML deck from a Beamer source.
--- Usage: kinetic [--engine=latex|dvilualatex] <file.tex>
+-- Usage: kinetic [--engine=latex|dvilualatex] <file.tex> | --present <file.html>
 
 local lfs = require("lfs")
 local mime = require("mime")
@@ -10,6 +10,7 @@ local MAX_LATEX_RUNS = 4
 local SVG_PREFIX = "kn-"
 local ERROR_LINES = 12
 local ENGINES = { latex = true, dvilualatex = true }
+local USAGE = "usage: kinetic [--engine=latex|dvilualatex] <file.tex> | --present <file.html>"
 local HTML_SETUP = [[\def\pgfsysdriver{pgfsys-dvisvgm.def}]]
   .. [[\PassOptionsToPackage{dvisvgm}{graphicx}\PassOptionsToPackage{dvisvgm}{xcolor}]]
 
@@ -250,12 +251,26 @@ local function page_markup(svg, n, srcdir, images)
   return '<div class="page">' .. svg .. "</div>"
 end
 
+local function present(html)
+  if not exists(html) then
+    fail("no such file: " .. html)
+  end
+  if os.name ~= "macosx" then
+    fail("--present needs macOS; elsewhere, open the deck in Chrome and share its tab")
+  end
+  local ok = os.execute(string.format("osascript -l JavaScript %s %s",
+    quote(script_file("kinetic-present.js")), quote(html)))
+  os.exit(ok and 0 or 1)
+end
+
 local function main()
   local engine = "latex"
   local tex
-  for _, a in ipairs(arg) do
+  for i, a in ipairs(arg) do
     local e = a:match("^%-%-engine=(.+)$")
-    if e then
+    if a == "--present" then
+      present(arg[i + 1] or fail(USAGE))
+    elseif e then
       engine = e
     elseif a:sub(1, 1) == "-" then
       fail("unknown option " .. a)
@@ -267,7 +282,7 @@ local function main()
     fail("unsupported engine " .. engine .. "; use latex or dvilualatex")
   end
   if not tex then
-    fail("usage: kinetic [--engine=latex|dvilualatex] <file.tex>")
+    fail(USAGE)
   end
   if not exists(tex) then
     fail("no such file: " .. tex)

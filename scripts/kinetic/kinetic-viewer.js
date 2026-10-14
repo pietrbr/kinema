@@ -9,9 +9,18 @@
   const DURATION = { morph: 700, staged: 1300, zoom: 1000, enter: 550 };
   const TRANSITION_DURATION = { fade: 450, push: 550 };
   const DIRECTION = { forward: 1, backward: -1 };
+  const nativeWindow = window.webkit?.messageHandlers?.kinetic;
+  const MODE = { normal: "normal", pen: "pen", laser: "laser" };
+  const PEN_WIDTH = 0.004;
+  const LASER_RADIUS = 0.007;
+  const LASER_TRAIL_MS = 250;
 
   const pages = [...document.querySelectorAll(".page")];
   const overlay = document.getElementById("overlay");
+  const marks = document.getElementById("marks");
+  const ink = marks.appendChild(document.createElementNS(SVG_NS, "g"));
+  const trail = marks.appendChild(document.createElementNS(SVG_NS, "path"));
+  const dot = marks.appendChild(document.createElementNS(SVG_NS, "circle"));
   let current = 0;
   let steps = [];
   let raf = 0;
@@ -632,6 +641,7 @@
     if (i < 0 || i >= pages.length) {
       return;
     }
+    clearMarks();
     const a = pages[current];
     const b = pages[i];
     const direction = delta > 0 ? DIRECTION.forward : DIRECTION.backward;
@@ -644,7 +654,116 @@
     run([main, enter].filter(Boolean));
   }
 
+  let mode = MODE.normal;
+  let stroke = null;
+  let strokePath = "";
+  let skipClick = false;
+  let laserPoints = [];
+
+  function setupMarks() {
+    const slide = pages[0].querySelector("svg");
+    const { width } = slide.viewBox.baseVal;
+    marks.setAttribute("viewBox", slide.getAttribute("viewBox"));
+    ink.setAttribute("stroke-width", String(PEN_WIDTH * width));
+    trail.setAttribute("stroke-width", String(LASER_RADIUS * width));
+    dot.setAttribute("r", String(LASER_RADIUS * width));
+    dot.setAttribute("visibility", "hidden");
+  }
+
+  function slidePoint(ev) {
+    return new DOMPoint(ev.clientX, ev.clientY).matrixTransform(
+      marks.getScreenCTM().inverse(),
+    );
+  }
+
+  function clearMarks() {
+    ink.replaceChildren();
+    stroke = null;
+  }
+
+  function setMode(next) {
+    mode = next;
+    document.body.dataset.mode = next;
+    stroke = null;
+    if (next !== MODE.laser) {
+      dot.setAttribute("visibility", "hidden");
+      laserPoints = [];
+      trail.removeAttribute("d");
+    }
+  }
+
+  function toggleMode(next) {
+    setMode(mode === next ? MODE.normal : next);
+  }
+
+  function drawTrail() {
+    const now = performance.now();
+    laserPoints = laserPoints.filter((q) => now - q.t < LASER_TRAIL_MS);
+    if (laserPoints.length < 2) {
+      trail.removeAttribute("d");
+    } else {
+      trail.setAttribute(
+        "d",
+        laserPoints.map((q, k) => `${k ? "L" : "M"}${q.x} ${q.y}`).join(""),
+      );
+    }
+    if (laserPoints.length > 0) {
+      requestAnimationFrame(drawTrail);
+    }
+  }
+
+  function moveLaser(ev) {
+    const q = slidePoint(ev);
+    dot.setAttribute("cx", String(q.x));
+    dot.setAttribute("cy", String(q.y));
+    dot.setAttribute("visibility", "visible");
+    if (laserPoints.length === 0) {
+      requestAnimationFrame(drawTrail);
+    }
+    laserPoints.push({ x: q.x, y: q.y, t: performance.now() });
+  }
+
+  document.addEventListener("pointerdown", (ev) => {
+    skipClick = false;
+    if (nativeWindow && ev.metaKey) {
+      skipClick = true;
+      nativeWindow.postMessage("drag");
+      return;
+    }
+    if (mode !== MODE.pen || ev.button !== 0 || help.classList.contains("open")) {
+      return;
+    }
+    skipClick = true;
+    const q = slidePoint(ev);
+    strokePath = `M${q.x} ${q.y}`;
+    stroke = ink.appendChild(document.createElementNS(SVG_NS, "path"));
+    stroke.setAttribute("d", strokePath);
+  });
+  document.addEventListener("pointermove", (ev) => {
+    if (mode === MODE.laser) {
+      moveLaser(ev);
+      return;
+    }
+    if (!stroke) {
+      return;
+    }
+    const q = slidePoint(ev);
+    strokePath += `L${q.x} ${q.y}`;
+    stroke.setAttribute("d", strokePath);
+  });
+  for (const type of ["pointerup", "pointercancel"]) {
+    document.addEventListener(type, () => {
+      stroke = null;
+    });
+  }
+  document.documentElement.addEventListener("pointerleave", () => {
+    dot.setAttribute("visibility", "hidden");
+  });
+
   function toggleFullscreen() {
+    if (!document.fullscreenEnabled) {
+      return;
+    }
     if (document.fullscreenElement) {
       document.exitFullscreen();
       return;
@@ -666,10 +785,21 @@
     if (ev.metaKey || ev.ctrlKey || ev.altKey) {
       return;
     }
+    if (ev.repeat && ["?", "p", "l", "f"].includes(ev.key)) {
+      return;
+    }
     if (ev.key === "?") {
       toggleHelp();
-    } else if (ev.key === "Escape") {
+    } else if (ev.key === "Escape" && help.classList.contains("open")) {
       closeHelp();
+    } else if (ev.key === "Escape") {
+      setMode(MODE.normal);
+    } else if (ev.key === "p") {
+      toggleMode(MODE.pen);
+    } else if (ev.key === "l") {
+      toggleMode(MODE.laser);
+    } else if (ev.key === "c") {
+      clearMarks();
     } else if (ev.key === "f") {
       toggleFullscreen();
     } else if (["ArrowRight", "PageDown", " "].includes(ev.key)) {
@@ -683,9 +813,16 @@
       closeHelp();
       return;
     }
+    if (skipClick) {
+      return;
+    }
     go(1);
   });
 
+  document.body.dataset.fullscreen = String(Boolean(document.fullscreenEnabled));
+  document.body.dataset.native = String(Boolean(nativeWindow));
+  setupMarks();
+  setMode(nativeWindow ? MODE.laser : MODE.normal);
   const start = Number.parseInt(params.get("page") ?? "1", 10);
   setCurrent(
     Math.max(
@@ -700,6 +837,12 @@
     },
     get busy() {
       return steps.length > 0;
+    },
+    get mode() {
+      return mode;
+    },
+    get marks() {
+      return ink.childElementCount;
     },
   };
 })();

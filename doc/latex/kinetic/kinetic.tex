@@ -22,7 +22,7 @@
 \newcommand{\cmd}[1]{\texttt{#1}}
 
 \title{The \pkg{} package\\[0.3em]\large Browser animations between Beamer overlays}
-\date{Version 0.2.1, 2026/10/10}
+\date{Version 0.3.0, 2026/10/14}
 
 \begin{document}
 \maketitle
@@ -394,12 +394,37 @@ Open the HTML file in a browser. The deck uses these controls:
 	\item Right arrow, Page Down, Space, or a click: next page.
 	\item Left arrow or Page Up: previous page.
 	\item \cmd{f}: full screen on and off.
+	\item \cmd{l}: laser pointer on and off. A red dot replaces the cursor and
+	      leaves a short trail.
+	\item \cmd{p}: pen on and off. You draw with the mouse, and a click does not
+	      change the page. A page change removes the marks.
+	\item \cmd{c}: remove the pen marks.
 	\item \cmd{?}: a list of the keys on and off. \cmd{Esc} or a click also closes
 	      the list.
+	\item \cmd{Esc}: stop the pen or the laser.
 \end{itemize}
 
 If the window has a different aspect ratio than the slides, black bars fill the
 rest of the window.
+
+\subsection{The present window}
+
+On macOS, \cmd{kinetic --present} opens a deck that you built before in a window
+with the slide aspect ratio and no title bar:
+\begin{lstlisting}
+kinetic --present talk.html
+\end{lstlisting}
+The window contains only the slide. If you share this window in a video call, for
+example in Microsoft Teams, the stream has no black bars and no browser controls.
+The window has these controls:
+\begin{itemize}
+	\item Drag an edge to resize the window. The window keeps the slide aspect
+	      ratio.
+	\item Hold Cmd and drag the slide to move the window.
+	\item Cmd-Q or Cmd-W closes the window.
+\end{itemize}
+When the window opens, the laser pointer is on. The \cmd{f} key does nothing in
+this window. On other systems, open the deck in Chrome and share its tab.
 
 The URL takes these parameters:
 \begin{description}
@@ -450,6 +475,7 @@ The repository contains these files:
 	\item[\cmd{scripts/kinetic/kinetic.lua}] the \cmd{kinetic} command.
 	\item[\cmd{scripts/kinetic/kinetic-viewer.js}] the viewer that runs in the browser.
 	\item[\cmd{scripts/kinetic/kinetic-template.html}] the page that holds the deck.
+	\item[\cmd{scripts/kinetic/kinetic-present.js}] the macOS present window.
 	\item[\cmd{doc/latex/kinetic/}] this manual.
 	\item[\cmd{examples/}] the example deck, its outputs, and its \cmd{latexmkrc}.
 	\item[\cmd{tests/check\_browsers.py}] the browser test.

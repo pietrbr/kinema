@@ -32,6 +32,12 @@ To see each feature, open `examples/showcase.html`. Its source is `examples/show
 
 4. Open `talk.html` in a browser. Use the arrow keys to move, and press `f` for full screen. Press `?` to see all keys.
 
+To share the deck in a video call on macOS, open it in a window with the slide aspect ratio. Then share that window:
+
+```sh
+kinetic --present talk.html
+```
+
 You build the PDF as usual, for example with `latexmk`. On Overleaf, upload `kinetic.sty` for the PDF build.
 
 ## Requirements
