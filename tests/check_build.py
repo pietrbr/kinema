@@ -1,4 +1,4 @@
-"""Build decks with PDF figures: with each converter, with none, and with each rejected option.
+"""Build decks with PDF figures (each converter, none, each rejected option) and rounded blocks.
 
 Usage: uv run --no-project python tests/check_build.py
 """
@@ -22,6 +22,16 @@ DECK = r"""\documentclass{{beamer}}
 \begin{{frame}}{{PDF figure}}\includegraphics[{options}]{{figure}}\end{{frame}}
 \end{{document}}
 """
+BLOCK_FILLS = ("#12ab34", "#56cd78")
+ROUNDED_DECK = r"""\documentclass{beamer}
+\usepackage{kinema}
+\setbeamertemplate{blocks}[rounded][shadow]
+\definecolor{kntitle}{HTML}{12AB34}\definecolor{knbody}{HTML}{56CD78}
+\setbeamercolor{block title}{fg=black,bg=kntitle}\setbeamercolor{block body}{bg=knbody}
+\begin{document}
+\begin{frame}{Rounded block}\begin{block}{Title}Body\end{block}\end{frame}
+\end{document}
+"""
 
 
 def tool_path(tmp: Path, tools: tuple[str, ...]) -> str:
@@ -37,9 +47,11 @@ def tool_path(tmp: Path, tools: tuple[str, ...]) -> str:
     return str(bindir)
 
 
-def build(tmp: Path, path: str, options: str = "width=3cm") -> subprocess.CompletedProcess:
+def build(
+    tmp: Path, path: str, options: str = "width=3cm", source: str | None = None
+) -> subprocess.CompletedProcess:
     deck = tmp / "deck.tex"
-    deck.write_text(DECK.format(options=options))
+    deck.write_text(source or DECK.format(options=options))
     shutil.rmtree(tmp / "deck.kinema", ignore_errors=True)
     cmd = ["texlua", str(SCRIPT), str(deck)]
     return subprocess.run(cmd, capture_output=True, text=True, env={**os.environ, "PATH": path})
@@ -66,6 +78,13 @@ def main() -> int:
             result = build(tmp, os.environ["PATH"], options)
             if result.returncode == 0 or message not in result.stderr.replace("\n", ""):
                 problems.append(f"{options}: expected an error naming '{message}'\n{result.stderr}")
+        result = build(tmp, os.environ["PATH"], source=ROUNDED_DECK)
+        if result.returncode != 0:
+            problems.append(f"rounded block: the build failed\n{result.stderr}")
+        html = (tmp / "deck.html").read_text().lower()
+        for fill in BLOCK_FILLS:
+            if html.count(fill) < 2:
+                problems.append(f"rounded block: {fill} fills only one part, the cap is black")
     print("\n".join(problems) or "ok")
     return 1 if problems else 0
 

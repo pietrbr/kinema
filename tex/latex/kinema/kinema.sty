@@ -80,6 +80,25 @@
 		\ifdefined\tikzexternaldisable\tikzexternaldisable\fi
 		\ifdefined\standaloneconfig\standaloneconfig{mode=tex}\fi
 		\kn@graphics}
+	% beamerbaseboxes sets the body color of a rounded box into \bmb@colorbox, outside
+	% any picture, and unboxes it later inside one. The SVG driver opens a <g> for that
+	% color and counts it in \pgf@sys@svg@scopecount, so move the count with the box,
+	% or the picture never writes the matching </g>. The rounded cap takes its color from
+	% \color, which dvisvgm applies to text only, so the cap must use \pgfsetcolor.
+	\def\kn@groups{0}
+	\def\kn@roundedboxes{%
+		\expandafter\patchcmd\csname\string\beamerboxesrounded\endcsname
+		{\pgfsetcolor{lower.bg}}
+		{\edef\kn@groups{\the\pgf@sys@svg@scopecount}\pgfsetcolor{lower.bg}%
+			\xdef\kn@groups{\the\numexpr\pgf@sys@svg@scopecount-\kn@groups}%
+			\global\advance\pgf@sys@svg@scopecount by-\kn@groups\relax}{}{}%
+		\expandafter\patchcmd\csname\string\beamerboxesrounded\endcsname
+		{\color{lower.bg}}{\pgfsetcolor{lower.bg}}{}{}%
+		\expandafter\patchcmd\csname\string\beamerboxesrounded\endcsname
+		{\color{upper.bg}}{\pgfsetcolor{upper.bg}}{}{}%
+		\patchcmd{\endbeamerboxesrounded}{\unhbox\bmb@colorbox}
+		{\unhbox\bmb@colorbox\global\advance\pgf@sys@svg@scopecount by\kn@groups\relax}{}{}}
+	\AtBeginDocument{\ifdefined\beamerboxesrounded\kn@roundedboxes\fi}
 	\AtBeginEnvironment{frame}{\gdef\kn@transition{}\global\advance\kn@frame by 1 }
 	\AddToHook{shipout/foreground}{\put(0,0){\special{dvisvgm:raw
 				<g data-kn-frame='\the\kn@frame' data-kn-transition='\kn@transition'/>}}}
